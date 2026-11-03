@@ -1,0 +1,18 @@
+PROVED P1: Organism 1 alone never produces Y (all strategies): tactic=auto,tacticsize=1,budget=300[s],duration=6081[ms],qe=164[ms],rcf=0,steps=6581
+PROVED P2: corrected co-culture bounds never overdraw a shared substrate: tactic=auto,tacticsize=1,budget=300[s],duration=9574[ms],qe=239[ms],rcf=0,steps=21046
+PROVED P2-thesis counterexample: per-organism bounds admit a negative concentration: tactic=witness: org 1 idle in L11, dwell 1/3 in L12; org 2 dwell 1 in L21,tacticsize=31,budget=300[s],duration=8861[ms],qe=234[ms],rcf=0,steps=18055
+PROVED P3: the co-culture can raise Y above the detection threshold within two dFBA steps: tactic=witness: step 1 org 2 dwells 1 in L21; step 2 org 1 dwells 3/10 in L11,tacticsize=62,budget=300[s],duration=27835[ms],qe=586[ms],rcf=0,steps=60717
+FAILED P2-thesis: per-organism bounds (as drawn in Ch. 6) never overdraw: tactic=auto,tacticsize=-1,budget=300[s],duration=-1[ms],qe=-1[ms],rcf=-1,steps=-1
+PROVED P1x: Organism 1 alone never produces Y (exact exponential biomass update): tactic=auto,tacticsize=1,budget=300[s],duration=3708[ms],qe=838[ms],rcf=0,steps=2799
+PROVED P2x: corrected co-culture bounds never overdraw a shared substrate (exact exponential biomass update): tactic=auto,tacticsize=1,budget=300[s],duration=7491[ms],qe=2077[ms],rcf=0,steps=6412
+PROVED P3L: E = exp(c t) lies in [1+Q, 1/(1-Q)] (justifies the interval used in P3): tactic=auto,tacticsize=1,budget=300[s],duration=874[ms],qe=150[ms],rcf=0,steps=704
+PROVED P4: one run of the co-culture automaton is one dFBA step (soundness, exact exponential): tactic=auto,tacticsize=1,budget=300[s],duration=10237[ms],qe=2831[ms],rcf=0,steps=11474
+PROVED P5: every feasible flux is realised by one run (completeness): tactic=witness: dwell exactly s_k in location k,tacticsize=32,budget=300[s],duration=3878[ms],qe=121[ms],rcf=0,steps=15340
+PROVED P5r: the dFBA successor of a feasible step satisfies P5's precondition again: tactic=auto,tacticsize=1,budget=300[s],duration=104[ms],qe=14[ms],rcf=0,steps=16
+PROVED P4a: one run of Organism 1 alone is one dFBA step (soundness): tactic=auto,tacticsize=1,budget=300[s],duration=5840[ms],qe=1146[ms],rcf=0,steps=5509
+PROVED P5a: every feasible flux of Organism 1 alone is realised by one run (completeness): tactic=witness: dwell exactly s_k in location k,tacticsize=24,budget=300[s],duration=3350[ms],qe=109[ms],rcf=0,steps=8316
+PROVED P4b: one run of Organism 2 alone is one dFBA step (soundness): tactic=auto,tacticsize=1,budget=300[s],duration=4035[ms],qe=609[ms],rcf=0,steps=2892
+PROVED P5b: every feasible flux of Organism 2 alone is realised by one run (completeness): tactic=witness: dwell exactly s3,tacticsize=16,budget=300[s],duration=2204[ms],qe=58[ms],rcf=0,steps=4300
+PROVED P6a: the forced chain of Organism 1 selects the unique growth-optimal feasible flux: tactic=auto,tacticsize=1,budget=300[s],duration=4649[ms],qe=168[ms],rcf=0,steps=10948
+PROVED P6b: the controlled automaton of Organism 2 selects the unique growth-optimal feasible flux: tactic=auto,tacticsize=1,budget=300[s],duration=2472[ms],qe=91[ms],rcf=0,steps=3832
+PROVED P7: every run sequence of the co-culture automaton is a dFBA trajectory (lockstep soundness): tactic=auto,tacticsize=1,budget=300[s],duration=25663[ms],qe=4248[ms],rcf=0,steps=14578

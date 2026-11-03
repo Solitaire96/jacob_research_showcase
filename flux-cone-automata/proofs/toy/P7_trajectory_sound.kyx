@@ -1,0 +1,40 @@
+ArchiveEntry "P7: every run sequence of the co-culture automaton is a dFBA trajectory (lockstep soundness)"
+/* Lockstep simulation.  The primed-free variables (Ac,..,Bio2c) are a COPY of the state that is advanced by the
+   dFBA step rule itself: concentrations x + Bio T v dt and biomass Bio e^(dt v_growth), with v = sum_k (t_k/dt) b_k
+   read off the run's dwell times.  Flag ok records whether each such flux was feasible at the copy's pre-state
+   (v in the cone and within the bounds).  Claim: for any number of runs, ok = 1 and the automaton state equals the copy. */
+Definitions
+  Real Vm = 20;
+  Real Km = 1/20;
+  Real dt = 1/10;
+  Bool capok(Real Q, Real x, Real Bt) <-> ( Q*(Km+x) + Vm*x*dt >= 0 & Q*Bt + x >= 0 );
+End.
+ProgramVariables
+  Real A, B, C, W, Y, Bio1, Bio2, Q1A, Q1C, Q1G, Q2A, Q2B, Q2G, xA, xB, xC, E1, E2, t1, t2, t3,
+       Ac, Bc, Cc, Wc, Yc, Bio1c, Bio2c, ok;
+End.
+Problem
+  A >= 0 & B >= 0 & C >= 0 & Bio1 > 0 & Bio2 > 0
+  ->
+  [ Ac := A; Bc := B; Cc := C; Wc := W; Yc := Y; Bio1c := Bio1; Bio2c := Bio2; ok := 1;
+  {
+     xA := A; xB := B; xC := C;
+     Q1A := 0; Q1C := 0; Q1G := 0; Q2A := 0; Q2B := 0; Q2G := 0; E1 := 1; E2 := 1; t1 := 0; t2 := 0; t3 := 0;
+     {A' = -Bio1, C' = -Bio1, Y' = Bio1, Q1A' = -1, Q1C' = -1, Q1G' = 1/10, E1' = E1/10, t1' = 1}@invariant(E1>0 & E2>0 & Bio1>0 & Bio2>0 & t1>=0 & t2>=0 & t3>=0 & Q1A = -(t1+3*t2) & Q1C = -t1 & Q2A = -t3 & Q2B = -t3 & A = xA - Bio1*(t1+3*t2) - Bio2*t3 & B = xB - Bio2*t3 & C = xC - Bio1*t1 + Bio2*t3 & Y = Yc + Bio1*t1 & W = Wc + 2*Bio1*t2 & xA = Ac & xB = Bc & xC = Cc & Bio1 = Bio1c & Bio2 = Bio2c & ok = 1);
+     {A' = -3*Bio1, W' = 2*Bio1, Q1A' = -3, Q1G' = 1/10, E1' = E1/10, t2' = 1}@invariant(E1>0 & E2>0 & Bio1>0 & Bio2>0 & t1>=0 & t2>=0 & t3>=0 & Q1A = -(t1+3*t2) & Q1C = -t1 & Q2A = -t3 & Q2B = -t3 & A = xA - Bio1*(t1+3*t2) - Bio2*t3 & B = xB - Bio2*t3 & C = xC - Bio1*t1 + Bio2*t3 & Y = Yc + Bio1*t1 & W = Wc + 2*Bio1*t2 & xA = Ac & xB = Bc & xC = Cc & Bio1 = Bio1c & Bio2 = Bio2c & ok = 1);
+     {A' = -Bio2, B' = -Bio2, C' = Bio2, Q2A' = -1, Q2B' = -1, Q2G' = 1/50, E2' = E2/50, t3' = 1}@invariant(E1>0 & E2>0 & Bio1>0 & Bio2>0 & t1>=0 & t2>=0 & t3>=0 & Q1A = -(t1+3*t2) & Q1C = -t1 & Q2A = -t3 & Q2B = -t3 & A = xA - Bio1*(t1+3*t2) - Bio2*t3 & B = xB - Bio2*t3 & C = xC - Bio1*t1 + Bio2*t3 & Y = Yc + Bio1*t1 & W = Wc + 2*Bio1*t2 & xA = Ac & xB = Bc & xC = Cc & Bio1 = Bio1c & Bio2 = Bio2c & ok = 1);
+     ?( capok(Q1A, xA, Bio1+Bio2) & capok(Q1C, xC, Bio1+Bio2) & capok(Q2A, xA, Bio1+Bio2) & capok(Q2B, xB, Bio1+Bio2) );
+     /* the dFBA step rule applied to the copy, with the flux read from the dwell times */
+     { ?( t1>=0 & t2>=0 & t3>=0 & capok(-(t1+3*t2), Ac, Bio1c+Bio2c) & capok(-t1, Cc, Bio1c+Bio2c) & capok(-t3, Ac, Bio1c+Bio2c) & capok(-t3, Bc, Bio1c+Bio2c) ); ++ ?!( t1>=0 & t2>=0 & t3>=0 & capok(-(t1+3*t2), Ac, Bio1c+Bio2c) & capok(-t1, Cc, Bio1c+Bio2c) & capok(-t3, Ac, Bio1c+Bio2c) & capok(-t3, Bc, Bio1c+Bio2c) ); ok := 0; }
+     Ac := Ac - Bio1c*(t1+3*t2) - Bio2c*t3;
+     Bc := Bc - Bio2c*t3;
+     Cc := Cc - Bio1c*t1 + Bio2c*t3;
+     Yc := Yc + Bio1c*t1;
+     Wc := Wc + 2*Bio1c*t2;
+     Bio1c := Bio1c*E1; Bio2c := Bio2c*E2;
+     Bio1 := Bio1*E1; Bio2 := Bio2*E2;
+   }*@invariant(A >= 0 & B >= 0 & C >= 0 & Bio1 > 0 & Bio2 > 0 & ok = 1
+                & Ac - A <= 0 & A - Ac <= 0 & Bc - B <= 0 & B - Bc <= 0 & Cc - C <= 0 & C - Cc <= 0 & Wc - W <= 0 & W - Wc <= 0 & Yc - Y <= 0 & Y - Yc <= 0 & Bio1c - Bio1 <= 0 & Bio1 - Bio1c <= 0 & Bio2c - Bio2 <= 0 & Bio2 - Bio2c <= 0)
+  ] ( ok = 1 & Ac - A <= 0 & A - Ac <= 0 & Bc - B <= 0 & B - Bc <= 0 & Cc - C <= 0 & C - Cc <= 0 & Wc - W <= 0 & W - Wc <= 0 & Yc - Y <= 0 & Y - Yc <= 0 & Bio1c - Bio1 <= 0 & Bio1 - Bio1c <= 0 & Bio2c - Bio2 <= 0 & Bio2 - Bio2c <= 0 )
+End.
+End.

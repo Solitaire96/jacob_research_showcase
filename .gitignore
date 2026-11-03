@@ -1,0 +1,21 @@
+# TeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.xmpi
+# Python
+__pycache__/
+*.py[cod]
+# macOS
+.DS_Store
+
+# Proof run logs are results, keep them
+!flux-cone-automata/proofs/toy/*.log

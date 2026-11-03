@@ -1,0 +1,21 @@
+ArchiveEntry "P5r: the dFBA successor of a feasible step satisfies P5's precondition again"
+/* Pure arithmetic: if concentrations are non-negative and the dwell vector s >= 0 meets the bounds on the current state,
+   the successor concentrations x + Bio T (sum s_k b_k) are non-negative.  Biomass stays positive because the update is
+   Bio * exp(.) (P2x/P4 prove Bio*E with E > 0).  Together with P5 (which holds from ANY such state) this lets P5 be
+   applied at every step: induction on the number of steps gives completeness for whole trajectories. */
+Definitions
+  Real Vm = 20;
+  Real Km = 1/20;
+  Real dt = 1/10;
+  Bool capok(Real Q, Real x, Real Bt) <-> ( Q*(Km+x) + Vm*x*dt >= 0 & Q*Bt + x >= 0 );
+End.
+ProgramVariables
+  Real A, B, C, Bio1, Bio2, s1, s2, s3;
+End.
+Problem
+  A >= 0 & B >= 0 & C >= 0 & Bio1 > 0 & Bio2 > 0 & s1 >= 0 & s2 >= 0 & s3 >= 0
+  & capok(-(s1+3*s2), A, Bio1+Bio2) & capok(-s1, C, Bio1+Bio2) & capok(-s3, A, Bio1+Bio2) & capok(-s3, B, Bio1+Bio2)
+  ->
+  ( A - Bio1*(s1+3*s2) - Bio2*s3 >= 0 & B - Bio2*s3 >= 0 & C - Bio1*s1 + Bio2*s3 >= 0 )
+End.
+End.

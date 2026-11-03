@@ -1,0 +1,30 @@
+ArchiveEntry "P5a: every feasible flux of Organism 1 alone is realised by one run (completeness)"
+Definitions
+  Real Vm = 20;
+  Real Km = 1/20;
+  Real dt = 1/10;
+  Bool capok(Real Q, Real x, Real Bt) <-> ( Q*(Km+x) + Vm*x*dt >= 0 & Q*Bt + x >= 0 );
+End.
+ProgramVariables
+  Real A, C, W, Y, Bio1, Q1A, Q1C, Q1G, xA, xC, xW, xY, t1, t2, s1, s2;
+End.
+Problem
+  A >= 0 & C >= 0 & Bio1 > 0 & s1 >= 0 & s2 >= 0
+  & capok(-(s1+3*s2), A, Bio1) & capok(-s1, C, Bio1)
+  ->
+  <{
+     xA := A; xC := C; xW := W; xY := Y; Q1G := 0; Q1A := 0; Q1C := 0; t1 := 0; t2 := 0;
+     {A' = -Bio1, C' = -Bio1, Y' = Bio1, Q1A' = -1, Q1C' = -1, Q1G' = 1/10, t1' = 1};
+     {A' = -3*Bio1, W' = 2*Bio1, Q1A' = -3, Q1G' = 1/10, t2' = 1};
+     ?( capok(Q1A, xA, Bio1) & capok(Q1C, xC, Bio1) );
+     ?( t1 = s1 & t2 = s2 );
+   }>
+  ( A = xA - Bio1*(s1+3*s2) & C = xC - Bio1*s1 & Y = xY + Bio1*s1 & W = xW + 2*Bio1*s2 & Q1G = (s1+s2)/10 )
+End.
+Tactic "witness: dwell exactly s_k in location k"
+  expandAllDefs; implyR(1); chase(1); (allR(1) | implyR(1))*;
+  solve(1); existsR("s1",1); andR(1); <(QE, (allR(1) | implyR(1))*;
+  solve(1); existsR("s2",1); andR(1); <(QE, (allR(1) | implyR(1))*;
+  chase(1); QE))
+End.
+End.

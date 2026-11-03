@@ -1,0 +1,8 @@
+Proof-level negative controls (run 2026-10-26 with the P8/P8g tactics; each mutated statement is false and must not be proved)
+P8  Bio1c := Bio1c*exp((s1+s2)/20)  (wrong growth exponent)        UNFINISHED
+P8  Cc := Cc - Bio1c*s1 + 2*Bio2c*s3 (wrong medium update)          UNFINISHED
+P8  dFBA test without the uptake bounds (s >= 0 only)               FAILED
+P8  dFBA test without s1 >= 0                                       FAILED
+P8g Bio2c := Bio2c*exp(s3/10)                                       UNFINISHED
+P8g Yc := Yc + 2*Bio1c*s1                                           UNFINISHED
+P8g dFBA test without the uptake bounds (s >= 0 only)               UNFINISHED

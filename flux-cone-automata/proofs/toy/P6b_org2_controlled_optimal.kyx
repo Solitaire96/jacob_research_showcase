@@ -1,0 +1,23 @@
+ArchiveEntry "P6b: the controlled automaton of Organism 2 selects the unique growth-optimal feasible flux"
+Definitions
+  Real Vm = 20;
+  Real Km = 1/20;
+  Real dt = 1/10;
+  Bool capok(Real Q, Real x, Real Bt) <-> ( Q*(Km+x) + Vm*x*dt >= 0 & Q*Bt + x >= 0 );
+  Bool hit(Real Q, Real x, Real Bt) <-> ( Q*(Km+x) + Vm*x*dt <= 0 | Q*Bt + x <= 0 );
+End.
+ProgramVariables
+  Real A, B, Bio2, Q2A, Q2B, xA, xB, t3, s3;
+End.
+Problem
+  A >= 0 & B >= 0 & Bio2 > 0
+  ->
+  [{
+     xA := A; xB := B; Q2A := 0; Q2B := 0; t3 := 0;
+     {A' = -Bio2, B' = -Bio2, Q2A' = -1, Q2B' = -1, t3' = 1 & capok(Q2A, xA, Bio2) & capok(Q2B, xB, Bio2)};
+     ?( hit(Q2A, xA, Bio2) | hit(Q2B, xB, Bio2) );
+   }]
+  ( t3 >= 0 & capok(-t3, xA, Bio2) & capok(-t3, xB, Bio2)
+  & \forall s3 ( (s3 >= 0 & capok(-s3, xA, Bio2) & capok(-s3, xB, Bio2)) -> s3 <= t3 ) )
+End.
+End.

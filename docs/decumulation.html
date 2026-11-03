@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deep-RL Decumulation</title>
+<meta name="description" content="A two-minute read: a deep-RL agent learns a retirement spending and allocation policy from 70 years of market history, scored on data it never saw against the closed-form benchmark.">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#fcfcfb; --surface:#ffffff; --line:#e4e3df; --grid:#ecebe7;
+  --ink:#0b0b0b; --ink-2:#52514e; --ink-3:#7a7975;
+  --s1:#2a78d6; --s2:#eb6834; --s2-fill:rgba(235,104,52,.14);
+  --max:68rem;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#1a1a19; --surface:#222221; --line:#33332f; --grid:#2c2c29;
+    --ink:#f0efec; --ink-2:#c3c2b7; --ink-3:#8f8e86;
+    --s1:#3987e5; --s2:#d95926; --s2-fill:rgba(217,89,38,.18);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#1a1a19; --surface:#222221; --line:#33332f; --grid:#2c2c29;
+  --ink:#f0efec; --ink-2:#c3c2b7; --ink-3:#8f8e86;
+  --s1:#3987e5; --s2:#d95926; --s2-fill:rgba(217,89,38,.18);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:var(--max);margin:0 auto;padding:40px 16px 64px}
+h1{font-size:clamp(28px,4vw,40px);line-height:1.1;margin:0 0 8px;letter-spacing:-.01em}
+h2{font-size:20px;margin:40px 0 10px}
+p{margin:0 0 12px;max-width:62ch}
+.lede{font-size:18px;color:var(--ink-2);max-width:66ch}
+.meta{color:var(--ink-3);font-size:14px;margin-bottom:28px}
+.meta a{color:inherit}
+a{color:var(--s1)}
+.grid{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:800px){.grid{grid-template-columns:1.6fr 1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 18px 14px}
+.card h3{margin:0 0 4px;font-size:15px;font-weight:600}
+.card .sub{color:var(--ink-3);font-size:13px;margin:0 0 10px}
+.stat{display:flex;flex-direction:column;justify-content:center}
+.stat .n{font-size:56px;line-height:1;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stat .l{color:var(--ink-2);font-size:14px;margin-top:8px;max-width:28ch}
+.stat .row{display:flex;gap:18px;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+.stat .row div{font-size:13px;color:var(--ink-3)}
+.stat .row b{display:block;font-size:20px;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--ink-2);margin:4px 0 6px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:14px;height:3px;border-radius:2px;display:inline-block}
+.sw.band{height:10px;border-radius:2px;opacity:.9}
+svg{width:100%;height:auto;display:block;overflow:visible}
+.axis text{fill:var(--ink-3);font-size:12px}
+.axis line,.axis path{stroke:var(--grid);stroke-width:1}
+.axis .base{stroke:var(--line)}
+.lab{font-size:12px;fill:var(--ink-2)}
+.tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:13px;line-height:1.35;box-shadow:0 4px 14px rgba(0,0,0,.08);white-space:nowrap;transform:translate(-50%,calc(-100% - 10px));opacity:0;transition:opacity .08s}
+.tip b{font-variant-numeric:tabular-nums}
+.wrap{position:relative}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink-3);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.tag{display:inline-block;font-size:12px;padding:1px 7px;border:1px solid var(--line);border-radius:999px;color:var(--ink-2);white-space:nowrap}
+@media (max-width:420px){.tag{white-space:normal}th,td{padding-left:6px;padding-right:6px}}
+ul{padding-left:20px;max-width:66ch}
+li{margin-bottom:6px}
+.refs{padding-left:22px;font-size:14px;color:var(--ink-2);line-height:1.5}
+.refs li{margin:0 0 6px}
+.refs a{overflow-wrap:anywhere}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:0 0 28px;overflow-x:auto}
+.tabs a{padding:8px 12px 9px;color:var(--ink-3);text-decoration:none;font-size:14px;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs a:hover{color:var(--ink)}
+.tabs a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
+.foot{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);color:var(--ink-3);font-size:13px}
+details{margin-top:10px}
+summary{cursor:pointer;color:var(--ink-2);font-size:14px}
+.sr{position:absolute;left:-9999px}
+.figs{display:grid;gap:16px;grid-template-columns:1fr;margin-top:12px}
+@media(min-width:800px){.figs{grid-template-columns:1fr 1.15fr}}
+.grid2{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:800px){.grid2{grid-template-columns:1fr 1fr}}
+figure{margin:0}
+.side{display:grid;gap:12px 24px;grid-template-columns:minmax(0,1fr);align-items:center}
+@media(min-width:800px){.side{grid-template-columns:minmax(0,1.45fr) minmax(0,1fr)}.side figcaption{margin-top:0;font-size:14px}}
+.split{display:grid;gap:24px;grid-template-columns:minmax(0,1fr);align-items:start}
+@media(min-width:800px){.split{grid-template-columns:minmax(0,1.55fr) minmax(0,1fr)}.split>aside,.split>figure{margin-top:52px}}
+.thm{border-left:3px solid var(--s1)}
+.thm p{max-width:none;font-size:15px}
+.thm-k{font-weight:600;font-size:14px;margin-bottom:6px}
+.thm .thm-n{color:var(--ink-3);font-size:13px;margin-bottom:0}
+figure img{width:100%;height:auto;display:block;border-radius:6px;background:#fff}
+figcaption{font-size:13px;color:var(--ink-3);margin-top:10px}
+.card p{font-size:15px}
+pre.code{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ink);margin:10px 0 14px;max-width:100%}
+pre.code .c{color:var(--ink-3)}
+/* tabs: wrap on narrow screens so every project stays visible */
+@media (max-width:600px){.tabs{flex-wrap:wrap;overflow-x:visible}.tabs a{padding:8px 9px 9px}}
+
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:0 0 8px}
+.seg button{font:inherit;font-size:13px;padding:5px 12px;border:0;background:var(--surface);color:var(--ink-2);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--s1);color:#fff}
+.sw.dash{background:none!important;border-top:2px dashed var(--s2);height:0}
+.sw.dot{width:10px;height:10px;border-radius:50%}
+
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;margin:4px 0 0;font-size:14px}
+.kv dt{color:var(--ink-3)}
+.kv dd{margin:0}
+.leak table{margin:0}
+</style>
+</head>
+<body>
+<main>
+<nav class="tabs" aria-label="Projects">
+  <a href="./">Flux-cone automata</a>
+  <a href="debaters.html">Checking the debaters</a>
+  <a href="decumulation.html" aria-current="page">Deep-RL decumulation</a>
+</nav>
+<h1>Deep-RL retirement decumulation</h1>
+<p class="lede">How much should a retiree spend each year, and how much should stay in stocks, when markets and lifespan are both uncertain? Theory has a closed-form answer for a stylised version. This asks whether a model-free agent finds it on its own, and whether it holds up on two decades it never saw.</p>
+<p class="meta">Jacob Bowers · 2026 · <a href="https://github.com/Solitaire96/jacob_research_showcase/tree/main/drl-decumulation">code, data, checkpoints and tests on GitHub</a></p>
+
+<div class="grid">
+  <div class="card wrap">
+    <h3>Spending as a share of wealth, by age</h3>
+    <p class="sub">Median withdrawal rate on held-out (2000–2026) lifetimes. Never shown the annuity rule, the agents find its shape (spending rises with age) at a more conservative level: at 90, 12% and 14% (TD3 and DDPG) of wealth a year against the rule's 20%.</p>
+    <div class="legend" id="lg1"></div>
+    <svg id="c1" viewBox="0 0 640 320" role="img" aria-labelledby="c1t"><title id="c1t">Withdrawal rate rises with age for both the agent and the annuitized rule</title></svg>
+    <div class="tip" id="tip1"></div>
+  </div>
+  <div class="card stat">
+    <div class="n">$6,129</div>
+    <div class="l">certainty-equivalent real spending per month for the DDPG agent (mean of 5 seeds), on 2000–2026 data held out from training.</div>
+    <div class="row">
+      <div><b>$6,080</b>best annuitized rule, tuned on the same training data</div>
+      <div><b>$5,077</b>4% rule, 60/40</div>
+    </div>
+    <div class="row" style="border-top:0;padding-top:0;margin-top:10px">
+      <div style="max-width:34ch">Agent minus rule here: +$49 a month; 4 of 5 seeds significantly above the rule, 1 below (95% paired intervals). With multi-year regimes kept intact (60-month blocks) the gap is −$70. It scores about the same as the closed-form rule; it does not robustly beat it.</div>
+    </div>
+    <div class="row">
+      <div style="max-width:34ch"><b>Caught on the way</b>A version that could see macro state scored +$969 a month in-sample and −$227 held out: it had memorised which stretch of history came next. The gap gave it away; it is reproduced on purpose below.</div>
+    </div>
+  </div>
+</div>
+
+<div class="split">
+<div>
+<h2>The problem, in one paragraph</h2>
+<p>A 65-year-old has $1M and $2,000 a month of guaranteed income. Once a year until death they choose an equity weight and a withdrawal rate; returns, rebalancing and withdrawals run monthly. The objective is expected CRRA utility of real consumption (risk aversion γ = 4), weighted by Gompertz survival (median death age 85.7). Lifetimes are 12-month block bootstraps of real US returns: the agent trains on 1955–1999 only, and is scored on 2000–2026, which holds the dot-com crash, 2008, 2020 and the 2022 bond crash. The score is certainty-equivalent consumption: the constant monthly spending worth the same expected utility as the policy's uncertain stream. Two actor-critic algorithms are trained, DDPG (Lillicrap et al., 2016) and TD3 (Fujimoto et al., 2018), five seeds each.</p>
+</div>
+  <aside class="card thm" aria-label="Setup at a glance">
+    <div class="thm-k">Setup at a glance</div>
+    <dl class="kv">
+      <dt>Retiree</dt><dd>age 65, $1,000,000 saved, $2,000/month guaranteed</dd>
+      <dt>Decisions</dt><dd>every 12 months: equity weight and withdrawal rate</dd>
+      <dt>Objective</dt><dd>CRRA utility of real consumption, &gamma; = 4, survival-weighted</dd>
+      <dt>Lifetimes</dt><dd>12-month block bootstrap of real US returns</dd>
+      <dt>Train</dt><dd>1955-07 to 1999-12</dd>
+      <dt>Test</dt><dd>2000-01 to 2026-09, held out</dd>
+      <dt>Agents</dt><dd>TD3 and DDPG, 5 seeds each</dd>
+      <dt>Score</dt><dd>certainty-equivalent $/month over 5,000 lifetimes</dd>
+    </dl>
+  </aside>
+</div>
+
+<div class="split">
+<div>
+<h2>The leak, caught and reproduced</h2>
+<p>Blocks of real history make lifetimes realistic, and they make memorisation easy. When the agent saw last month's Fed funds rate, term spread and inflation at each annual decision, that triplet identified the calendar month, and with it the next twelve months of returns. A 64×64 network learned the map. The tell is the gap between in-sample and held-out scores. The table gives each agent's score minus the tuned annuitized rule's, in real $/month.</p>
+</div>
+<aside class="card leak" aria-label="Agent minus the tuned rule, real $ a month">
+<table>
+<thead><tr><th>Agent</th><th>In-sample</th><th>Held out</th></tr></thead>
+<tbody><tr><td>DDPG + macro, leaky lag</td><td class='num'>+969</td><td class='num'>-227</td></tr><tr><td>TD3</td><td class='num'>-188</td><td class='num'>+30</td></tr><tr><td>DDPG</td><td class='num'>-63</td><td class='num'>+49</td></tr><tr><td>DDPG + macro</td><td class='num'>-147</td><td class='num'>-95</td></tr><tr><td>TD3 + macro</td><td class='num'>-237</td><td class='num'>-44</td></tr></tbody>
+</table>
+</aside>
+</div>
+<p style="margin-top:12px">The fix lags macro state along the simulated path, not the source history, so at a block boundary the agent sees the previous, independent block. At annual decisions that leaves nothing to learn from, and the default agent observes only wealth and age. The "leaky lag" rows reproduce the bug on purpose (<code>train.py --leaky</code>); the "+ macro" rows keep the macro features with the fix in place.</p>
+
+<div class="grid2" style="margin-top:16px">
+  <div class="card wrap">
+    <h3>Equity weight, by age</h3>
+    <p class="sub">Median on held-out lifetimes. With $2,000/month of guaranteed income acting like a bond, both the agent and the tuned rule hold mostly equities.</p>
+    <svg id="c2" viewBox="0 0 520 300" role="img" aria-labelledby="c2t"><title id="c2t">Equity weight by age, agent vs annuitized rule</title></svg>
+    <div class="tip" id="tip2"></div>
+  </div>
+  <div class="card wrap">
+    <h3>Score, in-sample vs held out</h3>
+    <p class="sub">Certainty-equivalent real $/month, 5,000 lifetimes each. One dot per seed for agents.</p>
+    <div class="legend"><span><i class="sw dot" style="background:var(--s1)"></i>Held out, 2000–2026</span><span><i class="sw dot" style="background:var(--ink-3)"></i>In-sample, 1955–1999</span></div>
+    <svg id="c3" viewBox="0 0 520 300" role="img" aria-labelledby="c3t"><title id="c3t">Certainty-equivalent consumption by policy</title></svg>
+    <div class="tip" id="tip3"></div>
+  </div>
+</div>
+
+<h2>Replay a real retirement</h2>
+<p>Not a bootstrap draw: the actual month-by-month sequence for someone who retired at 65 into January 2000 or January 2007. Agent shown is the median seed, not the best one. Look at both measures: the 4% rule ends with the most money because it spends the least.</p>
+<div class="card wrap">
+  <div class="seg" id="segc" role="group" aria-label="Retirement start"><button type="button" data-c="2000-01" aria-pressed="true">Retire Jan 2000</button><button type="button" data-c="2007-01" aria-pressed="false">Retire Jan 2007</button></div>
+  <div class="seg" id="segm" role="group" aria-label="Measure" style="margin-left:8px"><button type="button" data-m="wealth" aria-pressed="true">Portfolio</button><button type="button" data-m="cons" aria-pressed="false">Monthly spending</button></div>
+  <div class="legend" id="lg4"></div>
+  <svg id="c4" viewBox="0 0 1000 380" role="img" aria-labelledby="c4t"><title id="c4t">Portfolio value over the actual historical sequence</title></svg>
+  <div class="tip" id="tip4"></div>
+</div>
+
+<h2>Benchmarks</h2>
+<table>
+<thead><tr><th>Rule</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td>4% rule, 60/40</td><td>Bengen (1994): a fixed real withdrawal of 4% of starting wealth. The only fixed-dollar rule; it runs out in 3.9% of held-out lifetimes (the annuitized rules in 0.5%, the agents in none).</td></tr>
+<tr><td>Best constant mix</td><td>A fixed equity weight and spending rate, grid-searched on training data (100% equity, 7.5% a year): $5,810 held out.</td></tr>
+<tr><td>Best annuitized</td><td>Spend wealth divided by the survival-weighted annuity factor, the closed-form structure of Merton (1969, 1971) and Yaari (1965); equity weight and real rate grid-searched on training data (100% equity, r = 1%).</td></tr>
+<tr><td>110-minus-age</td><td>The rule-of-thumb glide path, with annuitized spending.</td></tr>
+</tbody>
+</table>
+
+<h2>Honest limits</h2>
+<ul>
+<li>In this setting the closed-form rule is close to optimal, so the best an agent can do is roughly match it, and that is what happens: a small held-out edge that reverses with 60-month blocks. That is evidence the RL machinery works, not that RL beats theory. An edge would need genuine state dependence (a fitted regime or VAR return model, fat-tailed shocks, taxes, annuity purchases), none of which is in this simulator.</li>
+<li>Returns are index returns: CRSP total market and a 10-year Treasury built from monthly-average yields. No fees, no taxes, no credit, no TIPS.</li>
+<li>Mortality is a two-parameter Gompertz law (m = 88, b = 10, after Milevsky, 2012), not a life table; no couples, health or long-term-care shocks.</li>
+<li>2000–2026 is one realisation of history. Bootstrapping it gives many lifetimes, but they share its regimes; the in-sample tuned rules prefer 100% equity, which that window punished.</li>
+<li>Nothing here is peer-reviewed. The 2026 rebuild was done with AI coding assistants under my direction; the repo's ledger records what was checked and how.</li>
+</ul>
+
+<h2>References</h2>
+<ol class="refs">
+  <li>Bengen, W. P. (1994). Determining withdrawal rates using historical data. <i>Journal of Financial Planning</i> 7(4), 171–180.</li>
+  <li>Fujimoto, S., van Hoof, H. &amp; Meger, D. (2018). Addressing function approximation error in actor-critic methods. In <i>ICML 2018</i>, PMLR 80. <a href="https://arxiv.org/abs/1802.09477">arXiv:1802.09477</a></li>
+  <li>Lillicrap, T. P., Hunt, J. J., Pritzel, A., et al. (2016). Continuous control with deep reinforcement learning. In <i>ICLR 2016</i>. <a href="https://arxiv.org/abs/1509.02971">arXiv:1509.02971</a></li>
+  <li>Merton, R. C. (1969). Lifetime portfolio selection under uncertainty: the continuous-time case. <i>The Review of Economics and Statistics</i> 51(3), 247–257. <a href="https://doi.org/10.2307/1926560">doi:10.2307/1926560</a></li>
+  <li>Merton, R. C. (1971). Optimum consumption and portfolio rules in a continuous-time model. <i>Journal of Economic Theory</i> 3(4), 373–413. <a href="https://doi.org/10.1016/0022-0531(71)90038-X">doi:10.1016/0022-0531(71)90038-X</a></li>
+  <li>Milevsky, M. A. (2012). <i>The 7 Most Important Equations for Your Retirement</i>. Wiley.</li>
+  <li>Yaari, M. E. (1965). Uncertain lifetime, life insurance, and the theory of the consumer. <i>The Review of Economic Studies</i> 32(2), 137–150. <a href="https://doi.org/10.2307/2296058">doi:10.2307/2296058</a></li>
+</ol>
+<p class="sub" style="margin-top:6px">DOIs checked against Crossref and arXiv identifiers against arXiv, November 2026. Bengen (1994) and Milevsky (2012) have no DOI. Market data: Kenneth R. French Data Library and FRED.</p>
+
+<details><summary>Data behind the charts (table view)</summary>
+<table id="tbl"><thead><tr><th>Age</th><th>DDPG agent spend rate</th><th>Rule spend rate</th><th>DDPG agent equity</th><th>Rule equity</th></tr></thead><tbody></tbody></table>
+<p class="sub" style="margin-top:6px">DDPG agent: mean over its 5 seeds of the median at each age, on held-out lifetimes; the same series as the solid DDPG lines in the charts.</p>
+</details>
+
+<p class="foot">Source data: <code>drl-decumulation/results/results.json</code>, produced by <code>evaluate.py</code> from the shipped checkpoints. Market data: Kenneth R. French Data Library and FRED (<a href="https://github.com/Solitaire96/jacob_research_showcase/blob/main/drl-decumulation/data/SOURCES.md">sources</a>). Built on open literature and public data only.</p>
+</main>
+
+<script>
+(function(){
+const D={"profile":{"ages":[65.0,66.0,67.0,68.0,69.0,70.0,71.0,72.0,73.0,74.0,75.0,76.0,77.0,78.0,79.0,80.0,81.0,82.0,83.0,84.0,85.0,86.0,87.0,88.0,89.0,90.0,91.0,92.0,93.0,94.0,95.0,96.0,97.0,98.0,99.0,100.0,101.0,102.0,103.0,104.0],"spend":{"TD3":[0.0572,0.0562,0.0557,0.058,0.059,0.0602,0.0609,0.0621,0.0641,0.0665,0.0692,0.0712,0.0723,0.0744,0.0787,0.0836,0.0879,0.0928,0.0959,0.0984,0.1016,0.1038,0.1074,0.1114,0.1167,0.1212,0.1229,0.1291,0.1352,0.1457,0.1721,0.1961,0.2261,0.2634,0.3113,0.349,0.3775,0.3906,0.3966,0.4052],"DDPG":[0.0661,0.0628,0.0625,0.0645,0.0662,0.0671,0.0683,0.0697,0.0704,0.0716,0.0733,0.0752,0.0779,0.0812,0.083,0.0851,0.0897,0.096,0.1022,0.1066,0.1099,0.1152,0.1205,0.1274,0.1336,0.1397,0.1513,0.159,0.1676,0.1767,0.1887,0.2038,0.2224,0.2472,0.2777,0.3037,0.3412,0.3684,0.3195,0.3489]},"equity":{"TD3":[0.877,0.8716,0.8581,0.832,0.8167,0.8116,0.8188,0.8274,0.8334,0.8349,0.8239,0.8048,0.8035,0.8106,0.8032,0.7956,0.7935,0.7931,0.7871,0.7853,0.7691,0.7527,0.7482,0.7484,0.7486,0.7512,0.7449,0.736,0.7252,0.7287,0.7278,0.7184,0.7052,0.7031,0.7191,0.7571,0.7756,0.7017,0.7015,0.6877],"DDPG":[0.8938,0.9003,0.8872,0.8978,0.8949,0.8882,0.887,0.8919,0.9042,0.9114,0.8982,0.8694,0.8537,0.8483,0.8236,0.7877,0.7491,0.7661,0.8689,0.8804,0.8842,0.8996,0.8998,0.893,0.8745,0.8643,0.8671,0.8729,0.8761,0.8745,0.8739,0.8758,0.8752,0.8677,0.86,0.856,0.8429,0.8337,0.8418,0.8649]},"rule_spend":[0.0558,0.0578,0.06,0.0624,0.0649,0.0676,0.0705,0.0735,0.0769,0.0804,0.0842,0.0884,0.0928,0.0976,0.1028,0.1084,0.1145,0.121,0.1282,0.1359,0.1443,0.1535,0.1635,0.1744,0.1863,0.1993,0.2135,0.2292,0.2464,0.2655,0.2866,0.3102,0.3369,0.3676,0.4038,0.4487,0.5083,0.5982,0.7662,1.2554],"rule_equity":[1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0]},"dots":[{"name":"4% rule, 60/40","held":[5076.991010017169],"ins":[5161.017969691534],"kind":"rule"},{"name":"Best constant mix (100% eq, 7.5%/yr)","held":[5809.91378655063],"ins":[6616.877932460426],"kind":"rule"},{"name":"Best annuitized (100% eq, r=1%)","held":[6080.081687651396],"ins":[6873.2968515417715],"kind":"rule"},{"name":"110-minus-age, annuitized","held":[5446.357797485432],"ins":[5808.7438738235105],"kind":"rule"},{"name":"TD3 agent","held":[6029.448601200012,6131.364102003571,6153.802358097301,6113.6901580374515,6124.203265020243],"ins":[6727.092843758214,6607.857368627386,6641.2281903662,6770.543553266099,6677.684033256353],"kind":"agent"},{"name":"DDPG agent","held":[6065.766037259065,6120.066176731519,6176.815109149045,6111.119100986733,6171.256692719521],"ins":[6844.462575626245,6731.675085425472,6766.075642666237,6846.351769208148,6861.690735001116],"kind":"agent"}],"cohorts":{"2000-01":{"end":"2026-09","wealth":{"4% rule, 60/40":[1000000.0,1007668.0,971705.0,970136.0,913526.0,841449.0,856324.0,779068.0,824557.0,813131.0,747633.0,683712.0,702691.0,679573.0,753535.0,732085.0,776779.0,785810.0,756000.0,750672.0,778037.0,748508.0,761465.0,748251.0,747368.0,752247.0,720378.0,737759.0,765151.0,756781.0,757420.0,766775.0,746459.0,703386.0,663264.0,628190.0,579420.0,526538.0,546340.0,592189.0,596889.0,608255.0,570590.0,610122.0,623668.0,628205.0,623630.0,574885.0,605228.0,634154.0,626303.0,630983.0,622229.0,645920.0,641076.0,643677.0,669438.0,668284.0,677224.0,670491.0,693595.0,697693.0,678310.0,644610.0,657123.0,659593.0,661527.0,668971.0,654560.0,665598.0,675672.0,680037.0,690326.0,666202.0,667937.0,683493.0,618160.0,662398.0,680368.0,680082.0,698748.0,630010.0,710796.0,735769.0,779035.0,769223.0,783252.0,768380.0,775175.0,706196.0,586650.0,555548.0,563973.0,574695.0,590087.0,553887.0,588954.0,605996.0,608155.0,630664.0,616623.0,589182.0,616149.0,639212.0,631016.0,625525.0,627431.0],"Best annuitized":[1000000.0,1012586.0,941876.0,922739.0,807496.0,689403.0,724326.0,597654.0,665321.0,656384.0,559767.0,455073.0,481569.0,454245.0,523943.0,528630.0,583199.0,582714.0,575722.0,551574.0,591160.0,563582.0,564518.0,562288.0,566452.0,581433.0,553719.0,564732.0,593254.0,583967.0,602011.0,595601.0,558847.0,490866.0,463514.0,414263.0,327270.0,287334.0,324227.0,366254.0,377041.0,392117.0,340806.0,370209.0,400284.0,410305.0,397325.0,327029.0,356483.0,391187.0,369734.0,379188.0,370513.0,400306.0,402470.0,416607.0,446184.0,439360.0,445022.0,433411.0,445610.0,441469.0,428144.0,385460.0,396840.0,388104.0,383723.0,388801.0,392517.0,400910.0,400439.0,403159.0,414902.0,397578.0,397330.0,410514.0,338382.0,370322.0,371137.0,358563.0,375174.0,289280.0,343940.0,359500.0,395641.0,398949.0,406048.0,384417.0,390006.0,345314.0,267305.0,244851.0,247740.0,252398.0,260305.0,238175.0,253467.0,263481.0,259624.0,260645.0,253792.0,227379.0,239427.0,244361.0,233438.0,225763.0,222151.0],"DDPG (seed1)":[1000000.0,1003646.0,955828.0,945846.0,873148.0,764870.0,796043.0,679068.0,744609.0,734943.0,649133.0,557713.0,583551.0,552748.0,628307.0,624993.0,679559.0,683223.0,663924.0,649312.0,681868.0,653119.0,659631.0,652774.0,655173.0,665858.0,635889.0,650067.0,678630.0,669252.0,685030.0,682553.0,647474.0,582414.0,551100.0,502906.0,418504.0,381540.0,390371.0,419554.0,420176.0,424709.0,401276.0,425925.0,428816.0,430599.0,425463.0,389367.0,409250.0,429026.0,420096.0,422178.0,414204.0,433489.0,429870.0,433830.0,453253.0,447888.0,452956.0,443304.0,456229.0,452745.0,437616.0,401093.0,409872.0,403618.0,400227.0,404599.0,403778.0,410005.0,410057.0,411197.0,419702.0,399738.0,396663.0,405069.0,343138.0,370383.0,371932.0,361244.0,373418.0,299600.0,350428.0,364484.0,396285.0,396543.0,402679.0,383637.0,388192.0,345358.0,270899.0,249975.0,253657.0,259307.0,268355.0,247495.0,264789.0,274925.0,271986.0,274925.0,268520.0,243169.0,255277.0,261107.0,250987.0,243337.0,239743.0],"TD3 (seed4)":[1000000.0,1012626.0,942157.0,923337.0,808508.0,692444.0,726885.0,602340.0,669670.0,661870.0,579102.0,489820.0,515189.0,492138.0,559483.0,556667.0,605292.0,608502.0,590479.0,577897.0,605870.0,580056.0,586007.0,578148.0,578841.0,586062.0,559589.0,571872.0,595275.0,586977.0,594648.0,595573.0,570154.0,520900.0,491477.0,454199.0,392669.0,353879.0,375775.0,411889.0,417389.0,427949.0,393500.0,423016.0,439208.0,442875.0,436506.0,393009.0,415989.0,437248.0,427140.0,429726.0,421438.0,434090.0,426796.0,424924.0,438048.0,432159.0,432991.0,423512.0,432945.0,429966.0,413220.0,386444.0,390200.0,385910.0,381553.0,380784.0,368642.0,369798.0,369444.0,366569.0,367344.0,349382.0,345673.0,349970.0,306657.0,333527.0,334519.0,323985.0,337442.0,270982.0,316186.0,328282.0,356124.0,354905.0,359941.0,344085.0,347393.0,310024.0,244042.0,225908.0,229901.0,235984.0,245323.0,226748.0,243638.0,254307.0,252684.0,256415.0,251674.0,229364.0,241146.0,247379.0,238735.0,232152.0,229238.0]},"cons":{"4% rule, 60/40":[5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333],"Best annuitized":[6646,6586,6505,6495,6361,6133,5935,5627,5428,5329,5184,5005,4841,4624,4545,4625,4751,4955,5065,5116,5154,5163,5176,5239,5256,5301,5345,5356,5436,5490,5594,5679,5697,5600,5462,5270,4903,4570,4311,4196,4285,4470,4577,4609,4677,4773,4881,4911,4892,4876,4843,4914,4973,5031,5143,5266,5453,5592,5710,5808,5873,5937,5982,5962,5924,5823,5758,5780,5787,5901,5994,6077,6204,6301,6351,6438,6365,6304,6284,6212,6291,6245,6221,6297,6389,6655,6949,7137,7269,7198,6881,6507,6112,5842,5767,5769,5770,5853,5924,6020,6151,6158,6130,6126,6104,6076,6129],"DDPG (seed1)":[7348,7252,7177,7159,6962,6541,6138,5646,5325,5246,5131,4996,4952,5003,5197,5515,5736,5758,5660,5514,5392,5336,5297,5291,5269,5317,5355,5371,5449,5504,5607,5692,5688,5532,5341,5109,4803,4660,4555,4546,4656,4756,4824,4872,4910,4898,4890,4834,4789,4819,4839,4905,4964,5050,5167,5273,5398,5439,5467,5499,5553,5688,5801,5854,5847,5701,5594,5562,5552,5703,5833,5951,6124,6300,6424,6574,6530,6405,6326,6212,6218,6094,5999,5983,6012,6237,6467,6610,6695,6596,6298,5956,5596,5337,5249,5225,5236,5368,5487,5629,5791,5838,5854,5887,5889,5850,5876],"TD3 (seed4)":[6641,6560,6460,6431,6281,6043,5835,5525,5284,5063,4816,4573,4392,4257,4226,4302,4439,4701,4877,5017,5106,5086,5081,5105,5088,5090,5083,5057,5092,5117,5181,5231,5234,5161,5060,4920,4677,4480,4337,4294,4356,4426,4448,4433,4471,4584,4701,4767,4808,4858,4896,4989,5088,5232,5402,5546,5692,5736,5766,5809,5828,5839,5827,5771,5724,5681,5671,5718,5722,5747,5760,5761,5789,5778,5732,5707,5623,5643,5697,5727,5823,5742,5687,5706,5716,5814,5912,5932,5930,5827,5565,5268,4975,4795,4755,4769,4792,4884,4966,5067,5198,5253,5282,5323,5338,5319,5352]}},"2007-01":{"end":"2026-09","wealth":{"4% rule, 60/40":[1000000.0,992139.0,996075.0,1011626.0,987972.0,934132.0,883939.0,840390.0,778567.0,710903.0,741184.0,807166.0,817298.0,836721.0,788509.0,847192.0,869983.0,880320.0,877925.0,813182.0,860365.0,905856.0,898983.0,910127.0,901958.0,940965.0,938436.0,946941.0,989689.0,992844.0,1011100.0,1005986.0,1045792.0,1057100.0,1032797.0,986543.0,1011018.0,1020389.0,1028914.0,1046085.0,1029192.0,1052373.0,1074223.0,1087152.0,1109699.0,1076839.0,1085893.0,1117550.0,1016739.0,1096221.0,1132766.0,1139000.0,1177206.0,1067738.0,1212054.0,1261781.0,1343574.0,1333924.0,1365720.0,1347082.0,1366620.0,1252385.0,1047317.0,999086.0,1022250.0,1049957.0,1086660.0,1028008.0,1102351.0,1143272.0,1156525.0,1208687.0,1190897.0,1146915.0,1209387.0,1264671.0,1258274.0,1257508.0,1271476.0],"Best annuitized":[1000000.0,988780.0,1024003.0,1017823.0,959543.0,846885.0,803622.0,721819.0,573139.0,505804.0,573751.0,651595.0,674444.0,705305.0,616475.0,673515.0,732494.0,755310.0,735857.0,609413.0,668483.0,738267.0,702337.0,725090.0,713304.0,775983.0,785668.0,819095.0,883655.0,876617.0,894650.0,878045.0,909873.0,908658.0,888448.0,806551.0,837430.0,826102.0,824004.0,842442.0,858321.0,884900.0,892323.0,907156.0,942876.0,912688.0,921576.0,962226.0,801712.0,887051.0,898997.0,878501.0,929963.0,725624.0,873258.0,924136.0,1029977.0,1052076.0,1084997.0,1041108.0,1070853.0,961534.0,755055.0,701826.0,720800.0,745650.0,781097.0,726174.0,785484.0,830215.0,832092.0,850006.0,842491.0,768637.0,824529.0,857640.0,835356.0,824077.0,827514.0],"DDPG (seed1)":[1000000.0,986311.0,991538.0,997423.0,961955.0,878525.0,830761.0,767781.0,661414.0,588521.0,649206.0,726132.0,744699.0,770533.0,700164.0,758899.0,801717.0,823994.0,808416.0,689140.0,750833.0,819366.0,786834.0,808149.0,796047.0,859005.0,865293.0,896007.0,960296.0,953462.0,972970.0,956263.0,991624.0,991870.0,970118.0,886202.0,919624.0,909722.0,908362.0,927550.0,940037.0,966685.0,976324.0,991092.0,1026094.0,992190.0,1000144.0,1039561.0,883022.0,965848.0,981893.0,965307.0,1011145.0,837246.0,982708.0,1031285.0,1126885.0,1115043.0,1133375.0,1102725.0,1112127.0,1007395.0,830794.0,784261.0,796269.0,816627.0,845835.0,790619.0,847604.0,880217.0,882685.0,909972.0,893683.0,841517.0,887770.0,921905.0,906239.0,897981.0,902194.0],"TD3 (seed4)":[1000000.0,988837.0,1024171.0,1018351.0,960536.0,848330.0,805102.0,723756.0,575790.0,515690.0,571445.0,642504.0,662599.0,686288.0,620687.0,673271.0,713574.0,728130.0,715482.0,622398.0,670843.0,721400.0,699590.0,713399.0,702796.0,751949.0,756022.0,777921.0,828538.0,822215.0,837360.0,822710.0,851852.0,851764.0,831961.0,761892.0,788855.0,780899.0,780096.0,796719.0,807193.0,831662.0,840845.0,855090.0,887402.0,861407.0,871700.0,909663.0,775284.0,857571.0,873781.0,859531.0,910467.0,753681.0,888453.0,935571.0,1026468.0,984021.0,982937.0,961928.0,948397.0,857797.0,713425.0,673395.0,678757.0,706187.0,743907.0,697776.0,759838.0,799788.0,804117.0,826978.0,819650.0,765818.0,812674.0,845398.0,830069.0,823960.0,830135.0]},"cons":{"4% rule, 60/40":[5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333,5333],"Best annuitized":[6646,6653,6742,6744,6752,6639,6474,6237,5772,5348,5021,4882,5009,5263,5415,5470,5573,5715,5875,5929,5917,5913,5885,5999,6096,6197,6372,6565,6850,7070,7262,7429,7552,7673,7771,7773,7753,7637,7577,7646,7695,7906,8088,8257,8499,8698,8828,9018,8956,8915,8940,8885,9077,9061,9086,9286,9520,10056,10652,11072,11403,11372,10894,10305,9671,9261,9211,9309,9409,9676,9927,10238,10628,10769,10841,10974,11075,11161,11434],"DDPG (seed1)":[7348,7310,7335,7307,7250,7018,6753,6427,6000,5738,5588,5614,5739,5767,5694,5533,5469,5559,5660,5665,5680,5827,5950,6186,6439,6780,7197,7628,7996,7964,7896,7804,7735,7815,7868,7829,7797,7733,7728,7845,7912,8083,8222,8346,8552,8745,8865,9037,8986,8976,9033,9026,9147,8932,8768,8726,8729,8971,9175,9247,9253,9087,8671,8190,7764,7665,7802,8010,8151,8215,8257,8363,8501,8464,8407,8363,8347,8381,8499],"TD3 (seed4)":[6641,6627,6694,6675,6670,6560,6399,6170,5656,5086,4583,4237,4251,4564,4813,5007,5215,5403,5599,5711,5755,5757,5743,5829,5888,5936,6038,6140,6353,6596,6817,7028,7163,7209,7230,7172,7105,6981,6908,6942,6943,7048,7127,7195,7281,7252,7173,7131,7005,7077,7198,7270,7431,7310,7228,7246,7346,7706,7988,8160,8240,8173,7926,7621,7252,6942,6857,6860,6993,7394,7775,8202,8555,8517,8446,8392,8317,8227,8231]}}},"best":"DDPG"};
+const NS='http://www.w3.org/2000/svg';
+const el=(n,a,p)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e;};
+const pct=v=>(v*100).toFixed(1)+'%';
+const usd=v=>'$'+Math.round(v).toLocaleString('en-US');
+const COL={'TD3':'var(--s1)','DDPG':'#1baf7a','rule':'var(--s2)','4%':'var(--ink-3)'};
+
+function legend(id,items){const L=document.getElementById(id);L.innerHTML=items.map(i=>`<span><i class="sw${i.dash?' dash':''}" style="background:${i.c}"></i>${i.t}</span>`).join('');}
+
+function lineChart(o){
+  const svg=document.getElementById(o.svg),tip=document.getElementById(o.tip),wrap=svg.parentNode;
+  svg.innerHTML='';
+  const W=o.W||640,H=o.H||320,m={t:20,r:o.r||96,b:36,l:56};
+  const x=v=>m.l+(v-o.x0)/(o.x1-o.x0)*(W-m.l-m.r);
+  const y=v=>H-m.b-(v-o.y0)/(o.y1-o.y0)*(H-m.t-m.b);
+  const ax=el('g',{class:'axis'},svg);
+  o.yt.forEach(v=>{el('line',{x1:m.l,x2:W-m.r,y1:y(v),y2:y(v)},ax);const t=el('text',{x:m.l-8,y:y(v)+4,'text-anchor':'end'},ax);t.textContent=o.yf(v);});
+  el('line',{class:'base',x1:m.l,x2:W-m.r,y1:y(o.y0),y2:y(o.y0)},ax);
+  o.xt.forEach(v=>{const t=el('text',{x:x(v),y:H-m.b+18,'text-anchor':'middle'},ax);t.textContent=v;});
+  const xl=el('text',{x:(m.l+W-m.r)/2,y:H-2,'text-anchor':'middle'},ax);xl.textContent=o.xl;
+  o.series.forEach(s=>{
+    const pts=s.y.map((v,i)=>v==null?null:`${x(o.xs[i])},${y(v)}`).filter(Boolean).join(' ');
+    const pl=el('polyline',{points:pts,fill:'none',stroke:s.c,'stroke-width':2,'stroke-linejoin':'round','stroke-linecap':'round'},svg);
+    if(s.dash)pl.setAttribute('stroke-dasharray','5 4');
+    if(s.label){let i=s.y.length-1;while(i>0&&s.y[i]==null)i--;const t=el('text',{class:'lab',x:x(o.xs[i])+6,y:y(s.y[i])+4+(s.dy||0)},svg);t.textContent=s.label;}
+  });
+  const cross=el('line',{y1:m.t,y2:H-m.b,stroke:'var(--line)','stroke-width':1,opacity:0},svg);
+  const dots=o.series.map(s=>el('circle',{r:4,fill:s.c,stroke:'var(--surface)','stroke-width':2,opacity:0},svg));
+  const hit=el('rect',{x:m.l,y:m.t,width:W-m.l-m.r,height:H-m.t-m.b,fill:'transparent'},svg);
+  function show(ev){
+    const r=svg.getBoundingClientRect(),px=(ev.clientX-r.left)/r.width*W;
+    let i=0,best=1e9;o.xs.forEach((v,j)=>{const d=Math.abs(x(v)-px);if(d<best){best=d;i=j;}});
+    cross.setAttribute('x1',x(o.xs[i]));cross.setAttribute('x2',x(o.xs[i]));cross.setAttribute('opacity',1);
+    o.series.forEach((s,k)=>{if(s.y[i]==null){dots[k].setAttribute('opacity',0);return;}dots[k].setAttribute('cx',x(o.xs[i]));dots[k].setAttribute('cy',y(s.y[i]));dots[k].setAttribute('opacity',1);});
+    tip.innerHTML=o.head(o.xs[i])+'<br>'+o.series.filter(s=>s.y[i]!=null).map(s=>`${s.name} <b>${o.yf(s.y[i])}</b>`).join('<br>');
+    const wr=wrap.getBoundingClientRect(),top=Math.min(...o.series.filter(s=>s.y[i]!=null).map(s=>y(s.y[i])));
+    tip.style.left=(x(o.xs[i])/W*r.width+(r.left-wr.left))+'px';tip.style.top=(top/H*r.height+(r.top-wr.top))+'px';tip.style.opacity=1;
+  }
+  const hide=()=>{cross.setAttribute('opacity',0);dots.forEach(d=>d.setAttribute('opacity',0));tip.style.opacity=0;};
+  hit.addEventListener('mousemove',show);hit.addEventListener('touchstart',e=>show(e.touches[0]),{passive:true});hit.addEventListener('mouseleave',hide);
+}
+
+// chart 1 + 2: profiles, ages 65..100
+const P=D.profile,cut=P.ages.findIndex(a=>a>100),n=cut<0?P.ages.length:cut;
+const xs=P.ages.slice(0,n),groups=Object.keys(P.spend);
+legend('lg1',[...groups.map(g=>({t:g+' agent (mean of seed medians)',c:COL[g]})),{t:'Best annuitized rule',c:COL.rule,dash:1}]);
+const smax=Math.max(...groups.flatMap(g=>P.spend[g].slice(0,n)),...P.rule_spend.slice(0,n)),sy1=Math.ceil(smax*10)/10,syt=[];
+for(let v=0;v<=sy1+1e-9;v+=sy1>0.35?0.1:0.05)syt.push(+v.toFixed(2));
+lineChart({svg:'c1',tip:'tip1',xs,x0:65,x1:100,y0:0,y1:sy1,yt:syt,yf:v=>Math.round(v*100)+'%',r:70,xt:[65,70,75,80,85,90,95,100],xl:'age',
+  head:a=>'age '+a,series:[...groups.map(g=>({name:g,c:COL[g],y:P.spend[g].slice(0,n),label:g,dy:g==='DDPG'?10:0})),{name:'Annuitized rule',c:COL.rule,dash:1,y:P.rule_spend.slice(0,n),label:'rule',dy:0}]});
+lineChart({svg:'c2',tip:'tip2',W:520,H:300,r:56,xs,x0:65,x1:100,y0:0,y1:1,yt:[0,.25,.5,.75,1],yf:v=>Math.round(v*100)+'%',xt:[65,70,75,80,85,90,95,100],xl:'age',
+  head:a=>'age '+a,series:[...groups.map(g=>({name:g,c:COL[g],y:P.equity[g].slice(0,n),label:g,dy:12+(g==='DDPG'?12:0)})),{name:'Annuitized rule',c:COL.rule,dash:1,y:P.rule_equity.slice(0,n),label:'rule',dy:-8}]});
+
+// table view
+const tb=document.querySelector('#tbl tbody'),g0=D.best;
+xs.forEach((a,i)=>{if(a%5)return;const tr=document.createElement('tr');tr.innerHTML=`<td class="num">${a}</td><td class="num">${pct(P.spend[g0][i])}</td><td class="num">${pct(P.rule_spend[i])}</td><td class="num">${pct(P.equity[g0][i])}</td><td class="num">${pct(P.rule_equity[i])}</td>`;tb.appendChild(tr);});
+
+// chart 3: dot plot
+(function(){
+  const svg=document.getElementById('c3'),tip=document.getElementById('tip3'),wrap=svg.parentNode;
+  const rows=D.dots,W=520,H=300,m={t:10,r:16,b:36,l:150};
+  const all=rows.flatMap(r=>[...r.held,...r.ins]),lo=Math.floor(Math.min(...all)/500)*500,hi=Math.ceil(Math.max(...all)/500)*500;
+  const x=v=>m.l+(v-lo)/(hi-lo)*(W-m.l-m.r),band=(H-m.t-m.b)/rows.length,y=i=>m.t+band*(i+.5);
+  const ax=el('g',{class:'axis'},svg);
+  for(let v=lo;v<=hi;v+=500){el('line',{x1:x(v),x2:x(v),y1:m.t,y2:H-m.b},ax);const t=el('text',{x:x(v),y:H-m.b+18,'text-anchor':'middle'},ax);t.textContent='$'+(v/1000)+'k';}
+  const xl=el('text',{x:(m.l+W-m.r)/2,y:H-2,'text-anchor':'middle'},ax);xl.textContent='certainty-equivalent real $/month';
+  rows.forEach((r,i)=>{
+    const t=el('text',{class:'lab',x:m.l-10,y:y(i)+4,'text-anchor':'end'},svg);t.textContent=r.name.replace(/ \(.*\)/,'');
+    const mk=(v,c,dy,lab)=>{const d=el('circle',{cx:x(v),cy:y(i)+dy,r:5,fill:c,stroke:'var(--surface)','stroke-width':2},svg);
+      const h=el('circle',{cx:x(v),cy:y(i)+dy,r:11,fill:'transparent'},svg);
+      h.addEventListener('mousemove',()=>{const R=svg.getBoundingClientRect(),wr=wrap.getBoundingClientRect();tip.innerHTML=`${r.name}<br>${lab} <b>${usd(v)}</b>`;
+        tip.style.left=(x(v)/W*R.width+(R.left-wr.left))+'px';tip.style.top=((y(i)+dy)/H*R.height+(R.top-wr.top))+'px';tip.style.opacity=1;});
+      h.addEventListener('mouseleave',()=>tip.style.opacity=0);};
+    r.ins.forEach(v=>mk(v,'var(--ink-3)',-5,'in-sample'));r.held.forEach(v=>mk(v,'var(--s1)',5,'held out'));
+  });
+})();
+
+// chart 4: cohort replay
+(function(){
+  const names=Object.keys(D.cohorts['2000-01'].wealth);
+  const colorOf=k=>k.startsWith('TD3')?COL.TD3:k.startsWith('DDPG')?COL.DDPG:k.startsWith('Best')?COL.rule:COL['4%'];
+  legend('lg4',names.map(k=>({t:k,c:colorOf(k),dash:k.startsWith('Best')})));
+  let cur='2000-01',meas='wealth';
+  function draw(){
+    const C=D.cohorts[cur],S=C[meas],xs=S[names[0]].map((_,i)=>+(65+i*0.25).toFixed(2));
+    const W=meas==='wealth';
+    const mx=Math.max(...names.flatMap(k=>S[k]))/(W?1e6:1);
+    const step=W?0.5:2000,y1=Math.ceil(mx/step)*step,yt=[];for(let v=0;v<=y1+1e-9;v+=step)yt.push(v);
+    lineChart({svg:'c4',tip:'tip4',W:1000,H:380,r:24,xs,x0:65,x1:Math.ceil(xs[xs.length-1]),y0:0,y1,yt,
+      yf:W?(v=>'$'+v.toFixed(1)+'M'):(v=>usd(v)),
+      xt:xs.filter(a=>Number.isInteger(a)&&a%5===0),
+      xl:(W?'portfolio, real $':'spending per month, real $, trailing 12-month average')+' · actual history to '+C.end,
+      head:a=>{const yr=+cur.slice(0,4)+Math.floor(a-65);return 'age '+Math.floor(a)+' · '+yr;},
+      series:names.map(k=>({name:k,c:colorOf(k),dash:k.startsWith('Best'),y:S[k].map(v=>W?v/1e6:v)}))});
+  }
+  const wire=(id,attr,set)=>document.querySelectorAll('#'+id+' button').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('#'+id+' button').forEach(o=>o.setAttribute('aria-pressed',o===b));set(b.dataset[attr]);draw();}));
+  wire('segc','c',v=>cur=v);wire('segm','m',v=>meas=v);
+  draw();
+})();
+})();
+</script>
+</body>
+</html>

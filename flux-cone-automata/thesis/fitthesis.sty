@@ -1,0 +1,360 @@
+%Florida Institute of Technology Dissertation / Master's Thesis Style
+%Intended to conform with the graduate school's thesis guidlines.
+%Modified June 15, 2016 by Evans Library (Tom Misilo)
+
+%Florida Institute of Technology Master's Thesis Style.
+%Intended to conform with the graduate school's thesis guidlines.
+%Modified August 31, 2009 by Justin Enjo based on
+
+%Florida Institute of Technology Master's Thesis Style.
+%Intended to conform with the graduate school's thesis guidlines.
+%Modified January 15, 2008 by Scott H. Brown based on
+
+%University of South Carolina Thesis Style.
+% Copyright (C) 2004-2006 by Jose M. Vidal. All Rights Reserved.
+% Last updated in Tuesday, 27 November 2007, 02:27PM
+%Based on the follwing statment
+% The author grants permission for anyone to use this macro package and
+% to distribute it unchanged without further restriction.  If you choose
+% to modify this package, you must indicate that you have modified it
+% prior to your distributing it.  I don't want to get bug reports about
+% changes that *you* have made!
+
+\ProvidesPackage{fitthesis}
+\typeout{Document Style Option `fitthesis'.}
+
+\long\def\comment#1{}
+\comment{
+  See sample fitthesis.tex
+}
+\RequirePackage{setspace}
+\RequirePackage{geometry}
+\RequirePackage{etoolbox}
+% Add hyperlinks. You can comment out this line if its giving you
+% problems.  float.sty and algorithm.sty have to be loaded *before*
+% hyperref.  Note that later in \hypersetup{} we make links invisible
+% so the printout will look nice. The links still work.
+
+\RequirePackage[plainpages=false,pdfpagelabels]{hyperref}
+
+% Change from Contents to Table of Contents
+\renewcommand{\contentsname}{Table of Contents}
+
+
+
+%If you would like your urls \url{http...} to appear in normal (roman)
+%font then un-comment the next line
+%\urlstyle{rm}
+
+% First thing we do is make sure that report has been loaded.  A
+% common error is to try to use fitthesis as a documentstyle.
+
+\@ifundefined{chapter}{\@latexerr{The `fit' option should be used
+with the `report' document style}{You should probably read the
+fit.tex example.}}{}
+
+
+% Yuck! Why do they want double spacing! It makes the thesis look
+% horrible. Double spacing should only be used for drafts that will be
+% marked up with a pen.
+\doublespacing 
+
+%Set the margins. Set paper size since many systems now default to A4
+%paper. The dvips and pdftex commands ensure that the pagesize is
+%passed on to dvips and pdflatex, respectively. If you are using some
+%other driver then you might need to change this.
+\geometry{letterpaper,left=1.2in,right=1.2in,top=1.2in,bottom=1.2in,paperheight=11in,paperwidth=8.5in,dvips,pdftex}
+
+%chapter appears two inches below top of page
+\def\@makechapterhead#1{%
+  \vspace*{.9in}%
+  {\parindent \z@ \raggedright \normalfont
+    \ifnum \c@secnumdepth >\m@ne
+        \huge\bfseries \@chapapp\space \thechapter
+        \par\nobreak
+        \vskip 20\p@
+    \fi
+    \interlinepenalty\@M
+    \Huge \bfseries #1\par\nobreak
+    \vskip 40\p@
+  }}
+
+%chapter* appears two inches below top of page.
+%\def\@makeschapterhead#1{%
+% \vspace*{.9in}
+  %{\parindent \z@ \raggedright
+    %\normalfont
+    %\interlinepenalty\@M
+   % \Huge \bfseries  #1\par\nobreak
+  %  \vskip 40\p@
+ % }}
+
+%make the footnote line 2in
+\renewcommand{\footnoterule}{\vspace*{-3pt}%
+  \hrule width 2in height 0.4pt \vspace*{2.6pt}}
+
+%Leave two spaces above and below rule
+%\skip\footins 20pt plus4pt minus4pt
+\addtolength{\skip\footins}{1.5em plus 4pt minus4pt}
+\setlength{\footnotesep}{2em}
+
+% \author, \title are defined in report; here are the rest of the
+% front matter defining macros
+\def\dept#1{\gdef\@dept{#1}}
+\def\directorname#1{\gdef\@directorname{#1}}
+\def\directortitle#1{\gdef\@directortitle{#1}}
+\def\directordept#1{\gdef\@directordept{#1}}
+
+\def\secondreadername#1{\gdef\@secondreadername{#1}}
+\def\secondreadertitle#1{\gdef\@secondreadertitle{#1}}
+\def\secondreaderdept#1{\gdef\@secondreaderdept{#1}}
+\def\thirdreadername#1{\gdef\@thirdreadername{#1}}
+\def\thirdreadertitle#1{\gdef\@thirdreadertitle{#1}}
+\def\thirdreaderdept#1{\gdef\@thirdreaderdept{#1}}
+\def\forthreadername#1{\gdef\@forthreadername{#1}}
+\def\forthreadertitle#1{\gdef\@forthreadertitle{#1}}
+\def\forthreaderdept#1{\gdef\@forthreaderdept{#1}}
+\def\academicunitheadname#1{\gdef\@academicunitheadname{#1}}
+\def\academicunitheadtitle#1{\gdef\@academicunitheadtitle{#1}}
+\def\academicunitheaddept#1{\gdef\@academicunitheaddept{#1}}
+\def\abstract#1{\gdef\@abstract{#1}}
+
+\def\GradDocumentType#1{\gdef\@GradDocumentType{#1}}
+
+%New as of 8/2018
+\def\CollegeOrSchoolName#1{\gdef\@CollegeOrSchoolName{#1}}
+
+\def\authordegree#1{\gdef\@authordegree{#1}}
+\def\degree#1{\gdef\@degree{#1}}
+\def\college#1{\gdef\@college{#1}}
+
+\def\copyrightyear#1{\gdef\@copyrightyear{#1}} % \author, \title in report
+%\def\@copyrightmonth{}
+\def\copyrightmonth#1{\gdef\@copyrightmonth{#1}}
+%\def\@copyrightmonth{}
+\def\@title{}
+\def\@author{}
+\def\@keywords{}
+\def\@abstract{}
+%\GradDocumentType can be of the following: thesis, dissertation, design project, doctoral research project
+
+\def\@GradDocumentType{dissertation}
+
+%	\def\@director{}
+\def\@UniversityCity{Melbourne}
+\def\@UniversityState{Florida}
+\def\@degree{Master of Science}
+\def\@college{College of Engineering}
+\def\@dept{Ocean Engineering}
+
+%Add Copyright Toggle Command
+\newtoggle{usecopyrightpage}
+
+%Major Advisor Information
+\def\@directorname{Major Advisors Name}
+\def\@directortitle{Major Advisors Title}
+\def\@directordept{Major Advisors Department}
+
+%For Outside Mmeber Information
+\def\@secondreadername{Outside Member Name}
+\def\@secondeadertitle{Third Member Title}
+\def\@secondreaderdept{Outside Member Department}
+
+\def\@thirdreadername{Third Member Name}
+\def\@thirdreadertitle{Third Member Title}
+\def\@thirdreaderdept{Third Member Department}
+
+\newtoggle{useforthreader}
+\def\@forthreadername{Forth Member Name}
+\def\@forthreadertitle{Forth Member Title}
+\def\@forthreaderdept{Forth Member Department}
+
+%Do not Use if AUH is already on committee
+\newtoggle{useacademicunithead}
+%\togglefalse{useacademicunithead}
+\def\@academicunitheadname{Academic Unit Head Name}
+\def\@academicunitheadtitle{Academic Unit Head Title}
+\def\@academicunitheaddept{Academic Unit Head Department}
+
+\def\makethesistitle{%
+  \@ifundefined{hypersetup}{}{%
+    \hypersetup{%
+      bookmarksnumbered,
+      pdftitle={\@title},
+      pdfauthor={\@author},
+      pdfsubject={\@dept},
+      pdfkeywords={\@keywords},
+      pdfview=FitH,
+      pdfborder=0 0 0, %Make all links invisible, so it looks good when printed
+    }}
+  \pagenumbering{roman}%
+  \thispagestyle{empty}%
+  \begin{center}
+  \vspace{.9in}
+    \expandafter{\@title} \\
+    \vspace{2em}
+    \vspace{2em}
+    by\\ 
+    \@author\\ 
+    \vspace{2em} 
+    \begin{singlespace}
+      \@authordegree
+    \end{singlespace} 
+    
+    %\vspace{2em}
+    \vspace{2em}
+    \begin{singlespace}
+      A \@GradDocumentType \\
+      submitted to the \@CollegeOrSchoolName \\
+      at Florida Institute of Technology\\
+      in partial fulfillment of the requirements\\
+      for the degree of\\
+      \vspace{2em}
+      \vspace{2em}
+      \@degree \\
+      in\\
+      \@dept \\
+
+    \vspace{4em}
+    \vspace{2em}
+    
+    \@UniversityCity, \@UniversityState\\
+    \@copyrightmonth, \@copyrightyear\\
+    \end{singlespace}
+%  \end{center}
+  \newpage
+
+  %Toggle Copyright Page
+  \iftoggle{usecopyrightpage}{
+  %Copyright Page
+    \thispagestyle{empty}
+    \phantom{.}
+    \vspace{2.5in}
+    
+    \begin{center}
+      \copyright~Copyright \@copyrightyear ~ \@author \\
+      All Rights Reserved
+      \vspace{4in}
+      \hrule
+      \vspace{4pt}
+      The author grants permission to make single copies.
+    \end{center}
+    \newpage}{}
+
+ % signature page omitted for the showcase build
+ \end{center}
+ \newpage}
+%Abstract
+%\renewenvironment{abstract}{%
+%  \newpage{}
+%  \addcontentsline{toc}{chapter}{Abstract} 
+%  \@beginparpenalty\@lowpenalty
+%  \begin{center}%
+%    ABSTRACT \\
+%    \@title \\
+%    \@author \\
+%    \vspace{3em}
+%    \@endparpenalty\@M 
+%  \end{center}}%
+
+\newcommand{\makeumiabstract}{%
+  \newpage{}
+  \addcontentsline{toc}{chapter}{Abstract}
+  \@beginparpenalty\@lowpenalty
+  \begin{center}%
+    ABSTRACT \\
+    %\vspace{5mm}
+    Title:\\
+   \@title\\
+    
+    %\vspace{5mm}
+    Author:\\
+    \@author\\
+    %\vspace{5mm}
+    Major Advisor:\\
+    \@directorname\\
+    
+    %\vspace{3em}
+    \@endparpenalty\@M
+  \end{center}
+  \@abstract \\[2em]
+  %\textbf{} \@directorname
+  }%
+\def\prefacesection#1{%
+	\chapter*{#1}
+	\addcontentsline{toc}{chapter}{#1}}
+
+% Redefine \thebibliography to go to a new page and put an entry in the
+% table of contents
+\renewcommand{\bibname}{References}
+
+\let\@ldthebibliography\thebibliography
+\renewcommand{\thebibliography}[1]{\newpage
+\@ldthebibliography{1}
+\addcontentsline{toc}{chapter}{References}
+	}
+
+\newcommand{\makeacknowledgments}{
+\newpage
+\addcontentsline{toc}{chapter}{Acknowledgments}
+\input{acknowledgments}
+\newpage
+}
+
+\newcommand{\maketableofcontents}{
+	\renewcommand\contentsname{Table of Contents}
+	\tableofcontents
+	\newpage
+}
+
+\newcommand{\makelistoffigures}{
+\addcontentsline{toc}{chapter}{List of Figures}
+\listoffigures
+\newpage
+}
+
+\newcommand{\makelistoftables}{
+\addcontentsline{toc}{chapter}{List of Tables}
+\listoftables
+\newpage
+}
+
+\newcommand{\makeabstract}{
+  \prefacesection{Abstract}
+  \@abstract}
+
+%Make it easier to place figures
+\renewcommand{\textfraction}{0.15}
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\bottomfraction}{0.65}
+\renewcommand{\floatpagefraction}{0.60}
+
+%Adjust Spacing for List of Figures / Tables
+\renewcommand*\l@figure{\@dottedtocline{1}{1em}{3.2em}}
+\renewcommand*\l@table{\@dottedtocline{1}{1em}{3.2em}}
+
+%Stop Bib from splitting Pages
+
+\AtBeginEnvironment{thebibliography}{%
+  \clubpenalty10000 %
+  \@clubpenalty \clubpenalty %
+  \widowpenalty10000 %
+  \interlinepenalty=10000 %
+} %
+
+%\renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}%
+%                                     {-3.25ex\@plus -1ex \@minus -.2ex}%
+%                                     {1.5ex \@plus .2ex}%
+ %                                    {\normalfont\normalsize\bfseries}}
+ 
+%Overrode Paragraph and subparagraph to continue the formating to look the same as other sections.
+\renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
+                                    {-3.25ex\@plus -1ex \@minus -.2ex}%
+                                     {1.5ex \@plus .2ex}%
+                                   {\normalfont\normalsize\bfseries}}
+\renewcommand\subparagraph{\@startsection{subparagraph}{5}{\parindent}%
+                                    {-3.25ex\@plus -1ex \@minus -.2ex}%
+                                     {1.5ex \@plus .2ex}%
+                                   {\normalfont\normalsize\bfseries}}
+
+\pagestyle{plain}

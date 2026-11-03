@@ -1,0 +1,25 @@
+%%-----------------Chapter 8---------------------------
+\chapter{Conclusions and Future Work}\label{chap:conclusions}
+
+\section{Conclusions}
+
+Several important conclusions can be derived from the previous -- namely, (a) a computational framework has been developed that is theoretically at least as powerful as dFBA (b) uses standard hybrid automata representation without invoking DAEs or other unorthodox constructs to complicate simulation and analysis (c) produces empirical results under numerical simulation that are comparable to the ones one would expect to see from dFBA as applied to the same model system, and (d) is generically parameterized such that automata can be produced given only the stoichiometry and parameters of simulation, with little knowledge of the mechanisms that govern the organism required. Thus, a highly extensible framework for \textit{in silico} microbial experimentation has been developed. Applicable theory that has not directly incorporated in this work but should be considered for immediate exploration includes:
+Optimal Control Theory, which will allow us to handle the generic case (for organisms with unknown control mechanisms), solving the optimal control problem is necessary to derive deterministic transition equations for the automaton. 
+% Between the Maximum Principle and ...
+
+% \subsection{Extreme Pathways Analysis}
+
+Another topic to consider for future exploration is extreme pathway analysis in which replacing the naive bases $B = \{b_1, ..., b_n\}$ of $S$ with the set of extreme pathways $E = \{e_1, ..., e_n\}$ maintains the generality of the framework and the structure of the flux cone while ensuring that positivity constraints (and other biological constraints) will always be satisfied. 
+% Statistical sampling techniques can be used to compute extreme pathways, which allow convex bases to be computed for genome-scale metabolic networks with tens of thousands of reactions. 
+% In addition, extreme pathways (and eigenpathways derived from their singular value decomposition) directly correspond to regulatory modes in the metabolic network, which greatly lends semantic value to the automata model. In this new formulation, each location $l_k$ corresponds to a regulatory mode, transitions between locations become regulatory shifts, and analysis should be performed to isolate the regulatory mechanisms and sub-networks responsible for emergent metabolite production and identify the intervals in which they are active. It should then be possible to find the environmental shifts that induce emergent behavior, retrace the sequence of shifts together with the corresponding regulatory modes, and discover the parameters (for both the medium and the organisms) under which emergent metabolite production is maximized.
+
+ \section{Future Work}
+
+ \subsection{Genome-Scale Model Analysis}
+
+% The next direct extension to test the predictive 
+
+\subsection{Solving the Optimal Control Problem}
+
+ \subsection{Differential Dynamic Logic}
+

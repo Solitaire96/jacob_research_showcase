@@ -1,0 +1,25 @@
+{
+  "algo": "td3",
+  "seed": 1,
+  "steps": 150000,
+  "use_macro": true,
+  "leaky_macro_lag": false,
+  "config": {
+    "start_age": 65.0,
+    "end_age": 105.0,
+    "initial_wealth": 1000000.0,
+    "guaranteed_income": 2000.0,
+    "gamma": 4.0,
+    "c_ref": 5000.0,
+    "beta": 0.999,
+    "min_spend_rate": 0.01,
+    "max_spend_rate": 0.6,
+    "decision_months": 12,
+    "block": 12
+  },
+  "train_window": [
+    "1955-07",
+    "1999-12"
+  ],
+  "wall_seconds": 475.8
+}

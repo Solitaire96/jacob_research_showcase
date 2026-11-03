@@ -1,0 +1,3 @@
+Mon Oct 26 01:21:42 UTC 2026
+PROVED P8: every dFBA trajectory is realised by a run of the co-culture automaton (completeness, endpoint form): tactic=loop over the dFBA copy; <**> iterate, Kd2, <*> approx; one-step lemma by cuts,tacticsize=280,budget=300[s],duration=15161[ms],qe=2544[ms],rcf=0,steps=28409
+PROVED P8g: the co-culture automaton follows every dFBA trajectory step by step (completeness, sequence form, hybrid game): tactic=loop over the game; [d] dual direct; one-step lemma by cuts,tacticsize=265,budget=300[s],duration=12829[ms],qe=2146[ms],rcf=0,steps=28385

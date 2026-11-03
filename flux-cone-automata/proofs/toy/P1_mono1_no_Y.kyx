@@ -1,0 +1,28 @@
+ArchiveEntry "P1: Organism 1 alone never produces Y (all strategies)"
+/* Corrected stage-3 automaton for Organism 1 alone (nondeterministic dwell times).
+   One loop iteration = one dFBA step:
+     snapshot; L11 (b1: A + C -> Y); L12 (b2*: 3A -> 2W); closing check; biomass update.
+   Closing check: every uptake Q_J >= -min{Vm x/(Km+x), x/(Bio dt)} dt on the snapshot x.
+   The biomass reset Bio := Bio exp(Q_G) is over-approximated by any Bio' >= Bio (sound for [ ]). */
+Definitions
+  Real Vm = 20;
+  Real Km = 1/20;
+  Real dt = 1/10;
+  Bool capok(Real Q, Real x, Real Bt) <-> ( Q*(Km+x) + Vm*x*dt >= 0 & Q*Bt + x >= 0 );
+End.
+ProgramVariables
+  Real A, C, W, Y, Bio1, Q1A, Q1C, Q1G, xA, xC;
+End.
+Problem
+  A >= 0 & C = 0 & Y = 0 & Bio1 > 0
+  ->
+  [{
+     xA := A; xC := C; Q1A := 0; Q1C := 0; Q1G := 0;
+     {A' = -Bio1, C' = -Bio1, Y' = Bio1, Q1A' = -1, Q1C' = -1, Q1G' = 1/10};
+     {A' = -3*Bio1, W' = 2*Bio1, Q1A' = -3, Q1G' = 1/10};
+     ?( capok(Q1A, xA, Bio1) & capok(Q1C, xC, Bio1) );
+     Bio1 := *; ?(Bio1 > 0);
+   }*@invariant(C = 0 & Y = 0 & Bio1 > 0)
+  ] Y = 0
+End.
+End.

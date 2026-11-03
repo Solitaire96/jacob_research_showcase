@@ -1,0 +1,22 @@
+# virtualenv
+.venv/
+
+# secrets (.env and any backups/variants; the example file is safe)
+.env*
+!.env.example
+
+# run artifacts
+output/cache/
+output/checkpoints/
+__pycache__/
+*.pyc
+.DS_Store
+_backup_before_fixes_*/
+.pytest_cache/
+
+# run outputs and the learned template library (built from the documents you run)
+output/reports/
+templates/
+
+# experiment runs (large; contain deal text)
+experiments/studies/

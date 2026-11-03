@@ -1,0 +1,22 @@
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+exclude = [".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+ignore = ["E501", "W291", "W293"]
+
+[tool.mypy]
+python_version = "3.13"
+files = ["app.py", "config.py", "llm.py", "agents", "ingestion", "orchestrator", "output"]
+exclude = ["^\\.venv/", "^tests/"]
+disallow_untyped_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_unused_ignores = true
+ignore_missing_imports = true
+explicit_package_bases = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

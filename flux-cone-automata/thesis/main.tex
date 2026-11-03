@@ -1,0 +1,139 @@
+\documentclass[letterpaper,oneside,12pt]{report}
+% Package loading---------------------------------
+\usepackage{fitthesis}
+\usepackage{epsfig}
+\usepackage{graphicx}
+
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+\usepackage{setspace}
+\usepackage{tabularx}
+\usepackage{hyperref}
+%\usepackage[a-1b]{pdfx} % PDF/A disabled for the showcase build
+
+
+\usepackage{subfig}
+\usepackage[subfigure]{tocloft} % no number for Vita in ToC
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{footmisc}
+%\usepackage{algorithmic} % not available in this TeX install; package unused
+\usepackage{listings}
+\usepackage{fancyvrb}
+\usepackage{booktabs}
+\usepackage{epstopdf}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{comment}
+\usepackage{float}
+\usepackage{graphicx}
+
+\graphicspath{{figures/}}  % Location of the graphics files
+
+
+%To get single-space, (for drafts only!) use:
+%\singlespacing
+
+\title{A Hybrid Automata Framework for the Representation and Analysis of Microbial Co-Cultures}
+\author{Jacob Francis Bowers}
+
+%\GradDocumentType can be of the following: thesis, dissertation, design project, doctoral research project
+\GradDocumentType{thesis}
+
+%Change this to be the college or school you are part of. For Example \CollegeOrSchoolName{College of Engineering and Science}
+\CollegeOrSchoolName{College of Engineering and Science}
+
+%Degree you are applying for, defaults to Master of Engineering
+\degree{Master of Science}
+\dept{Computer Science}
+
+%Your Previous Degree \\ University, year
+\authordegree{Bachelor of Science, Mathematical Sciences \\ Department of Mathematical Sciences \\ Florida Institute of Technology\\ 2017 \vspace{1em} \\
+	Bachelor of Science, Computer Science \\ Department of Computer Sciences \& Engineering \\ Florida Institute of Technology\\ 2017}
+%Month and Year document is turned in or graduation
+\copyrightmonth{May}
+\copyrightyear{2021}
+
+%Define Committee Information
+\directorname{Siddhartha Bhattacharyya, Ph.D.}
+\directortitle{Assistant Professor}
+\directordept{Department of Computer Sciences \& Engineering}
+
+%Second Committee Member / Outside Member
+\secondreadername{Ugur Abdulla, Ph.D., Dr.Sci., Dr.rer.nat.habil.}
+\secondreadertitle{Professor}
+\secondreaderdept{Department of Mathematical Sciences}
+
+%Third Committe Member
+\thirdreadername{Ryan Stansifer, Ph.D.}
+\thirdreadertitle{Associate Professor}
+\thirdreaderdept{Department of Computer Sciences \& Engineering}
+
+%Forth Committee Member
+\toggletrue{useforthreader}
+\forthreadername{Ambarish Nag, Ph.D.}
+\forthreadertitle{Senior Data Scientist}
+\forthreaderdept{Computational Science Center, National Renewable Energy Laboratory}
+
+%Use Academic Unit Head
+\toggletrue{useacademicunithead}
+\academicunitheadname{Phil Bernhard, Ph.D.}
+\academicunitheadtitle{Professor and Department Head}
+\academicunitheaddept{Department of Computer Sciences \& Engineering}
+
+
+%The following page is optional, to disable please use \togglefalse{usecopyrightpage}
+\toggletrue{usecopyrightpage}
+
+\begin{document}
+	
+	%For MS students
+	\makethesistitle
+
+	
+	%This abstract maintains the same look as all other sections.
+	%include Abstract Text
+	\include{abstract}
+	\makeumiabstract
+	
+	\pagebreak
+	%Optional
+	%\prefacesection{Preface}
+	\setcounter{secnumdepth}{6}
+	\setcounter{tocdepth}{4}
+	\newpage
+	\maketableofcontents
+	%\listoftables
+%	\newpage
+	\makelistoffigures
+	%Uncomment following line if you have 4 or more tables
+%	\newpage
+	\makelistoftables
+	
+%%-----------Abbreviations-------------------------
+\include{abbreviations}
+%%-----------Acknowledgments-----------------------
+\include{acknowledgments}
+%%-----------Dedication----------------------------
+\include{dedication}
+%%-----------change single space to double space---
+\doublespacing \pagenumbering{arabic}
+
+%%-----------Main Matter---------------------------
+\include{./chapters/chapter1}
+\include{./chapters/chapter2}
+\include{./chapters/chapter3}
+\include{./chapters/chapter4}
+\include{./chapters/chapter5}
+\include{./chapters/chapter6}
+\include{./chapters/chapter7}
+\include{./chapters/chapter8}
+%%-----------Back Matter---------------------------
+%%-----------Bibliography--------------------------
+\nocite{*}
+% Do not split a reference between two pages, this should be taken care of in the style
+\bibliographystyle{plain}
+\bibliography{mybibliography}
+%%-----------Appendices----------------------------
+\include{./chapters/appendices}
+\end{document}

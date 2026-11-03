@@ -1,0 +1,26 @@
+ArchiveEntry "P4a: one run of Organism 1 alone is one dFBA step (soundness)"
+Definitions
+  Real Vm = 20;
+  Real Km = 1/20;
+  Real dt = 1/10;
+  Bool capok(Real Q, Real x, Real Bt) <-> ( Q*(Km+x) + Vm*x*dt >= 0 & Q*Bt + x >= 0 );
+End.
+ProgramVariables
+  Real A, C, W, Y, Bio1, Q1A, Q1C, Q1G, xA, xC, E1, t1, t2, y0, w0, b1;
+End.
+Problem
+  A >= 0 & C >= 0 & Bio1 > 0
+  ->
+  [{
+     xA := A; xC := C; y0 := Y; w0 := W; b1 := Bio1;
+     Q1A := 0; Q1C := 0; Q1G := 0; E1 := 1; t1 := 0; t2 := 0;
+     {A' = -Bio1, C' = -Bio1, Y' = Bio1, Q1A' = -1, Q1C' = -1, Q1G' = 1/10, E1' = E1/10, t1' = 1}@invariant(E1>0 & Bio1>0 & t1>=0 & t2>=0 & Q1A = -(t1+3*t2) & Q1C = -t1 & Q1G = (t1+t2)/10 & A = xA - Bio1*(t1+3*t2) & C = xC - Bio1*t1 & Y = y0 + Bio1*t1 & W = w0 + 2*Bio1*t2 & Bio1 = b1);
+     {A' = -3*Bio1, W' = 2*Bio1, Q1A' = -3, Q1G' = 1/10, E1' = E1/10, t2' = 1}@invariant(E1>0 & Bio1>0 & t1>=0 & t2>=0 & Q1A = -(t1+3*t2) & Q1C = -t1 & Q1G = (t1+t2)/10 & A = xA - Bio1*(t1+3*t2) & C = xC - Bio1*t1 & Y = y0 + Bio1*t1 & W = w0 + 2*Bio1*t2 & Bio1 = b1);
+     ?( capok(Q1A, xA, Bio1) & capok(Q1C, xC, Bio1) );
+     Bio1 := Bio1*E1;
+   }]
+  ( t1>=0 & t2>=0 & capok(-(t1+3*t2), xA, b1) & capok(-t1, xC, b1)
+  & A = xA - b1*(t1+3*t2) & C = xC - b1*t1 & Y = y0 + b1*t1 & W = w0 + 2*b1*t2
+  & Q1G = (t1+t2)/10 & Bio1 = b1*E1 & E1 > 0 )
+End.
+End.

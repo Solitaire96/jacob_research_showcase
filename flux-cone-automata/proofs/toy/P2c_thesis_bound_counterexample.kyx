@@ -1,0 +1,32 @@
+ArchiveEntry "P2-thesis counterexample: per-organism bounds admit a negative concentration"
+/* Same co-culture step as P2, with the bound term x/(Bio_o dt) of the Ch. 6 figures,
+   i.e. each organism may take up the whole pool.  From A = 1, B = 10, C = 0,
+   Bio1 = Bio2 = 1 there is a strategy satisfying every closing check with A < 0 after the step. */
+Definitions
+  Real Vm = 20;
+  Real Km = 1/20;
+  Real dt = 1/10;
+  Bool capok(Real Q, Real x, Real Bt) <-> ( Q*(Km+x) + Vm*x*dt >= 0 & Q*Bt + x >= 0 );
+End.
+ProgramVariables
+  Real A, B, C, W, Y, Bio1, Bio2, Q1A, Q1C, Q1G, Q2A, Q2B, Q2G, xA, xB, xC;
+End.
+Problem
+  A = 1 & B = 10 & C = 0 & W = 0 & Y = 0 & Bio1 = 1 & Bio2 = 1
+  ->
+  < xA := A; xB := B; xC := C;
+    Q1A := 0; Q1C := 0; Q1G := 0; Q2A := 0; Q2B := 0; Q2G := 0;
+    {A' = -Bio1, C' = -Bio1, Y' = Bio1, Q1A' = -1, Q1C' = -1, Q1G' = 1/10};
+    {A' = -3*Bio1, W' = 2*Bio1, Q1A' = -3, Q1G' = 1/10};
+    {A' = -Bio2, B' = -Bio2, C' = Bio2, Q2A' = -1, Q2B' = -1, Q2G' = 1/50};
+    ?( capok(Q1A, xA, Bio1) & capok(Q1C, xC, Bio1)
+     & capok(Q2A, xA, Bio2) & capok(Q2B, xB, Bio2) );
+  > A < 0
+End.
+Tactic "witness: org 1 idle in L11, dwell 1/3 in L12; org 2 dwell 1 in L21"
+  expandAllDefs; implyR(1); chase(1); (allR(1) | implyR(1))*;
+  solve(1); existsR("0",1); andR(1); <(QE, (allR(1) | implyR(1))*;
+  solve(1); existsR("1/3",1); andR(1); <(QE, (allR(1) | implyR(1))*;
+  solve(1); existsR("1",1); andR(1); <(QE, (allR(1) | implyR(1))*; QE)))
+End.
+End.

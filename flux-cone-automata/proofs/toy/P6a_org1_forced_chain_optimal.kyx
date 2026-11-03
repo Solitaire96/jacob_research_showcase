@@ -1,0 +1,30 @@
+ArchiveEntry "P6a: the forced chain of Organism 1 selects the unique growth-optimal feasible flux"
+/* Controlled automaton of Organism 1 (Ch. 5, Sec. on control): dwell in L11 until the A or C bound is hit,
+   then in L12 until the A bound is hit.  The urgent guards are literally those of the Ariadne model
+   (Q (Km+x) + Vm x dt <= 0  or  Q Bio + x <= 0).  Claim: the dwell times (t1,t2) are feasible, and every
+   feasible (s1,s2) has s1+s2 <= t1+t2 (growth R3 = (m1+m2)/10 is maximal), with equality only for (s1,s2) = (t1,t2). */
+Definitions
+  Real Vm = 20;
+  Real Km = 1/20;
+  Real dt = 1/10;
+  Bool capok(Real Q, Real x, Real Bt) <-> ( Q*(Km+x) + Vm*x*dt >= 0 & Q*Bt + x >= 0 );
+  Bool hit(Real Q, Real x, Real Bt) <-> ( Q*(Km+x) + Vm*x*dt <= 0 | Q*Bt + x <= 0 );
+End.
+ProgramVariables
+  Real A, C, Bio1, Q1A, Q1C, xA, xC, t1, t2, s1, s2;
+End.
+Problem
+  A >= 0 & C >= 0 & Bio1 > 0
+  ->
+  [{
+     xA := A; xC := C; Q1A := 0; Q1C := 0; t1 := 0; t2 := 0;
+     {A' = -Bio1, C' = -Bio1, Q1A' = -1, Q1C' = -1, t1' = 1 & capok(Q1A, xA, Bio1) & capok(Q1C, xC, Bio1)};
+     ?( hit(Q1A, xA, Bio1) | hit(Q1C, xC, Bio1) );
+     {A' = -3*Bio1, Q1A' = -3, t2' = 1 & capok(Q1A, xA, Bio1)};
+     ?( hit(Q1A, xA, Bio1) );
+   }]
+  ( t1 >= 0 & t2 >= 0 & capok(-(t1+3*t2), xA, Bio1) & capok(-t1, xC, Bio1)
+  & \forall s1 \forall s2 ( (s1 >= 0 & s2 >= 0 & capok(-(s1+3*s2), xA, Bio1) & capok(-s1, xC, Bio1))
+        -> ( s1 + s2 <= t1 + t2 & (s1 + s2 >= t1 + t2 -> (s1 = t1 & s2 = t2)) ) ) )
+End.
+End.

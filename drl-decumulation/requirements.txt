@@ -1,0 +1,9 @@
+numpy>=1.26
+pandas>=2.1
+gymnasium>=1.0
+stable-baselines3>=2.3
+torch>=2.2
+matplotlib>=3.8
+pytest>=8
+# demo UI only
+streamlit>=1.35

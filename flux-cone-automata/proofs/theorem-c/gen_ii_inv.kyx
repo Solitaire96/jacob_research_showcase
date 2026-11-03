@@ -1,0 +1,46 @@
+ArchiveEntry "ThmC-ii generic, invariant exported: 0 <= B <= b <= P0 along every piecewise-constant strategy (adds c(x,0) = 0)"
+/* Same as gen_ii.kyx plus c(x,0) = 0, so that b <= P0 is also invariant; the postcondition is the loop invariant,
+   which is exactly the hypothesis of ex_ii.kyx at the start of the next segment (lifting glue, NOTE.md H3a). */
+Definitions
+  Real c(Real x, Real y);
+  Real dh(Real x, Real y);
+  Real Y;
+  Real P0;
+End.
+ProgramVariables
+  Real B; Real G; Real b; Real u; Real g;
+End.
+Problem
+  Y > 0
+  & (\forall x \forall y1 \forall y2 (x>=0 & 0<=y1 & y1<=y2 -> c(x,y1) <= c(x,y2)))
+  & (\forall x \forall y (Y*c(x,(P0-x)/Y) - Y*c(y,(P0-y)/Y) = dh(x,y)*(x-y)))
+  & (\forall x \forall y (y = 0 -> c(x,y) = 0))
+  & B >= 0 & G >= 0 & B + Y*G = P0 & b = B
+  ->
+  [{ u := *; g := *; ?(0<=u & u<=c(B,G) & 0<=g & g<=Y*u);
+     {B' = g, G' = -u, b' = Y*c(b,(P0-b)/Y) & G>=0 & u<=c(B,G)}
+   }*
+  ] (B >= 0 & G >= 0 & B + Y*G <= P0 & B <= b & b <= P0)
+End.
+Tactic "manual"
+  implyR(1); andL('L)*;
+  loop("B >= 0 & G >= 0 & B + Y*G <= P0 & B <= b & b <= P0", 1); <(
+    QE,
+    QE,
+    unfold;
+    dC("P0 - b >= 0", 1); <(
+      dC("B + Y*G <= P0", 1); <(
+        dC("B >= 0", 1); <(
+          dC("b - B >= 0", 1); <(
+            dW(1); QE,
+            dbx("dh(b,B)", 1); allR(1)*; implyR(1); allL("B", -2); allL("G", -2); allL("(P0-B)/Y", -2); allL("b", -3); allL("B", -3); QE
+          ),
+          dI(1)
+        ),
+        dI(1)
+      ),
+      dbx("dh(b,P0)", 1); allR(1)*; implyR(1); allL("b", -3); allL("P0", -3); allL("P0", -4); allL("(P0-P0)/Y", -4); QE
+    )
+  )
+End.
+End.

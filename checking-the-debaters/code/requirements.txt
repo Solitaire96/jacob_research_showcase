@@ -1,0 +1,19 @@
+# VC Investment Analysis — Multi-Agent Debate System
+# Tested 2026-10-21 with the versions noted; upper bounds guard against breaking majors.
+
+# LLM clients (langchain-core >= 1.0: imports come from langchain_core, not langchain.schema)
+langchain-core>=1.0,<2            # tested 1.6.13
+langchain-google-genai>=4.0,<5    # tested 4.4.2
+langchain-anthropic>=1.0,<2       # tested 1.7.6
+langchain-openai>=1.0,<2          # tested 1.7.2 — used for Cerebras (OpenAI-compatible API)
+
+# Document ingestion
+pdfplumber>=0.11,<0.12            # tested 0.11.10
+python-docx>=1.1,<2               # tested 1.2.0
+python-pptx>=1.0,<2               # tested 1.0.2
+openpyxl>=3.1,<4                  # tested 3.1.5
+
+# CLI & utilities
+python-dotenv>=1.0,<2
+rich>=13,<16                      # tested 15.0.0
+typer>=0.12,<1                    # tested 0.27.3

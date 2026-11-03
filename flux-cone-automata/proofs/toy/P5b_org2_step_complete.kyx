@@ -1,0 +1,28 @@
+ArchiveEntry "P5b: every feasible flux of Organism 2 alone is realised by one run (completeness)"
+Definitions
+  Real Vm = 20;
+  Real Km = 1/20;
+  Real dt = 1/10;
+  Bool capok(Real Q, Real x, Real Bt) <-> ( Q*(Km+x) + Vm*x*dt >= 0 & Q*Bt + x >= 0 );
+End.
+ProgramVariables
+  Real A, B, C, Bio2, Q2A, Q2B, Q2G, xA, xB, xC, t3, s3;
+End.
+Problem
+  A >= 0 & B >= 0 & C >= 0 & Bio2 > 0 & s3 >= 0
+  & capok(-s3, A, Bio2) & capok(-s3, B, Bio2)
+  ->
+  <{
+     xA := A; xB := B; xC := C; Q2G := 0; Q2A := 0; Q2B := 0; t3 := 0;
+     {A' = -Bio2, B' = -Bio2, C' = Bio2, Q2A' = -1, Q2B' = -1, Q2G' = 1/50, t3' = 1};
+     ?( capok(Q2A, xA, Bio2) & capok(Q2B, xB, Bio2) );
+     ?( t3 = s3 );
+   }>
+  ( A = xA - Bio2*s3 & B = xB - Bio2*s3 & C = xC + Bio2*s3 & Q2G = s3/50 )
+End.
+Tactic "witness: dwell exactly s3"
+  expandAllDefs; implyR(1); chase(1); (allR(1) | implyR(1))*;
+  solve(1); existsR("s3",1); andR(1); <(QE, (allR(1) | implyR(1))*;
+  chase(1); QE)
+End.
+End.

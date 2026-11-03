@@ -1,0 +1,230 @@
+% References for flux-cone-automata/ (results page, README.md, RESULTS.md).
+% DOIs checked against the Crossref API on 2026-11-03; years are print years
+% (Crossref gives online-first years for Platzer17, Benvenuti14 and Huangfu18).
+% Rockafellar69 has no DOI and was not checked against Crossref.
+
+% ---- models and data
+@article{Chiu14,
+  author  = {Chiu, Hsuan-Chao and Levy, Roie and Borenstein, Elhanan},
+  title   = {Emergent biosynthetic capacity in simple microbial communities},
+  journal = {PLoS Computational Biology},
+  year    = {2014},
+  volume  = {10},
+  number  = {7},
+  pages   = {e1003695},
+  doi     = {10.1371/journal.pcbi.1003695}
+}
+
+@article{ZhangReed14,
+  author  = {Zhang, Xiaolin and Reed, Jennifer L.},
+  title   = {Adaptive evolution of synthetic cooperating communities improves growth performance},
+  journal = {PLoS ONE},
+  year    = {2014},
+  volume  = {9},
+  number  = {10},
+  pages   = {e108297},
+  doi     = {10.1371/journal.pone.0108297}
+}
+
+@article{Orth11,
+  author  = {Orth, Jeffrey D. and Conrad, Tom M. and Na, Jessica and Lerman, Joshua A. and Nam, Hojung and Feist, Adam M. and Palsson, Bernhard {\O}.},
+  title   = {A comprehensive genome-scale reconstruction of {Escherichia coli} metabolism---2011},
+  journal = {Molecular Systems Biology},
+  year    = {2011},
+  volume  = {7},
+  number  = {1},
+  doi     = {10.1038/msb.2011.65}
+}
+
+@article{Bordbar11RBC,
+  author  = {Bordbar, Aarash and Jamshidi, Neema and Palsson, Bernhard O.},
+  title   = {{iAB-RBC-283}: A proteomically derived knowledge-base of erythrocyte metabolism that can be used to simulate its physiological and patho-physiological states},
+  journal = {BMC Systems Biology},
+  year    = {2011},
+  volume  = {5},
+  pages   = {110},
+  doi     = {10.1186/1752-0509-5-110}
+}
+
+@article{Bordbar17uFBA,
+  author  = {Bordbar, Aarash and Yurkovich, James T. and Paglia, Giuseppe and others},
+  title   = {Elucidating dynamic metabolic physiology through network integration of quantitative time-course metabolomics},
+  journal = {Scientific Reports},
+  year    = {2017},
+  volume  = {7},
+  pages   = {46249},
+  doi     = {10.1038/srep46249}
+}
+
+@article{Bordbar16Transfusion,
+  author  = {Bordbar, Aarash and Johansson, P{\"a}r I. and Paglia, Giuseppe and others},
+  title   = {Identified metabolic signature for assessing red blood cell unit quality is associated with endothelial damage markers and clinical outcomes},
+  journal = {Transfusion},
+  year    = {2016},
+  volume  = {56},
+  number  = {4},
+  pages   = {852--862},
+  doi     = {10.1111/trf.13460},
+  note    = {Stored-red-cell metabolomics (sample\_data.mat, shipped with uFBA) used for the RBC data checks}
+}
+
+% ---- dFBA and related prior work
+@article{Mahadevan02dFBA,
+  author  = {Mahadevan, Radhakrishnan and Edwards, Jeremy S. and Doyle, Francis J.},
+  title   = {Dynamic flux balance analysis of diauxic growth in {Escherichia coli}},
+  journal = {Biophysical Journal},
+  year    = {2002},
+  volume  = {83},
+  number  = {3},
+  pages   = {1331--1340},
+  doi     = {10.1016/S0006-3495(02)73903-9}
+}
+
+@article{Basan20,
+  author  = {Basan, Markus and Honda, Tomoya and Christodoulou, Dimitris and H{\"o}rl, Manuel and Chang, Yu-Fang and Leoncini, Emanuele and Mukherjee, Avik and Okano, Hiroyuki and Taylor, Brian R. and Silverman, Josh M. and Sanchez, Carlos and Williamson, James R. and Paulsson, Johan and Hwa, Terence and Sauer, Uwe},
+  title   = {A universal trade-off between growth and lag in fluctuating environments},
+  journal = {Nature},
+  year    = {2020},
+  volume  = {584},
+  number  = {7821},
+  pages   = {470--474},
+  doi     = {10.1038/s41586-020-2505-4}
+}
+
+@article{Clement21,
+  author  = {Clement, Tom J. and Baalhuis, Erik B. and Teusink, Bas and Bruggeman, Frank J. and Planqu{\'e}, Robert and de Groot, Daan H.},
+  title   = {Unlocking elementary conversion modes: ecmtool unveils all capabilities of metabolic networks},
+  journal = {Patterns},
+  year    = {2021},
+  volume  = {2},
+  number  = {1},
+  pages   = {100177},
+  doi     = {10.1016/j.patter.2020.100177}
+}
+
+% ---- convex analysis and LP
+@incollection{Rockafellar69,
+  author    = {Rockafellar, R. T.},
+  title     = {The elementary vectors of a subspace of {$R^N$}},
+  booktitle = {Combinatorial Mathematics and Its Applications},
+  editor    = {Bose, R. C. and Dowling, T. A.},
+  publisher = {University of North Carolina Press},
+  address   = {Chapel Hill, NC},
+  year      = {1969},
+  pages     = {104--127}
+}
+
+@article{DantzigWolfe60,
+  author  = {Dantzig, George B. and Wolfe, Philip},
+  title   = {Decomposition principle for linear programs},
+  journal = {Operations Research},
+  year    = {1960},
+  volume  = {8},
+  number  = {1},
+  pages   = {101--111},
+  doi     = {10.1287/opre.8.1.101}
+}
+
+@inproceedings{Fukuda96,
+  author    = {Fukuda, Komei and Prodon, Alain},
+  title     = {Double description method revisited},
+  booktitle = {Combinatorics and Computer Science},
+  series    = {Lecture Notes in Computer Science},
+  volume    = {1120},
+  pages     = {91--111},
+  publisher = {Springer},
+  year      = {1996},
+  doi       = {10.1007/3-540-61576-8_77},
+  note      = {Cited for cddlib, used for the exact conic generators}
+}
+
+@article{Huangfu18,
+  author  = {Huangfu, Qi and Hall, J. A. Julian},
+  title   = {Parallelizing the dual revised simplex method},
+  journal = {Mathematical Programming Computation},
+  year    = {2018},
+  volume  = {10},
+  number  = {1},
+  pages   = {119--142},
+  doi     = {10.1007/s12532-017-0130-5},
+  note    = {Cited for HiGHS}
+}
+
+% ---- logic, provers, reachability tools
+@article{Platzer08,
+  author  = {Platzer, Andr{\'e}},
+  title   = {Differential dynamic logic for hybrid systems},
+  journal = {Journal of Automated Reasoning},
+  year    = {2008},
+  volume  = {41},
+  number  = {2},
+  pages   = {143--189},
+  doi     = {10.1007/s10817-008-9103-8}
+}
+
+@article{Platzer17,
+  author  = {Platzer, Andr{\'e}},
+  title   = {A complete uniform substitution calculus for differential dynamic logic},
+  journal = {Journal of Automated Reasoning},
+  year    = {2017},
+  volume  = {59},
+  number  = {2},
+  pages   = {219--265},
+  doi     = {10.1007/s10817-016-9385-1}
+}
+
+@article{Platzer15dGL,
+  author  = {Platzer, Andr{\'e}},
+  title   = {Differential game logic},
+  journal = {ACM Transactions on Computational Logic},
+  year    = {2015},
+  volume  = {17},
+  number  = {1},
+  pages   = {1:1--1:51},
+  doi     = {10.1145/2817824}
+}
+
+@inproceedings{Fulton15,
+  author    = {Fulton, Nathan and Mitsch, Stefan and Quesel, Jan-David and V{\"o}lp, Marcus and Platzer, Andr{\'e}},
+  title     = {{KeYmaera X}: An axiomatic tactical theorem prover for hybrid systems},
+  booktitle = {Automated Deduction -- CADE-25},
+  series    = {Lecture Notes in Computer Science},
+  volume    = {9195},
+  pages     = {527--538},
+  publisher = {Springer},
+  year      = {2015},
+  doi       = {10.1007/978-3-319-21401-6_36}
+}
+
+@inproceedings{deMoura08,
+  author    = {de Moura, Leonardo and Bj{\o}rner, Nikolaj},
+  title     = {{Z3}: An efficient {SMT} solver},
+  booktitle = {Tools and Algorithms for the Construction and Analysis of Systems (TACAS)},
+  series    = {Lecture Notes in Computer Science},
+  volume    = {4963},
+  pages     = {337--340},
+  publisher = {Springer},
+  year      = {2008},
+  doi       = {10.1007/978-3-540-78800-3_24}
+}
+
+@article{Collins25,
+  author  = {Collins, Pieter and Geretti, Luca and Zivanovic Gonzalez, Sanja and Bresolin, Davide and Villa, Tiziano},
+  title   = {Rigorous function calculi in {Ariadne}},
+  journal = {Logical Methods in Computer Science},
+  year    = {2025},
+  volume  = {21},
+  number  = {3},
+  doi     = {10.46298/lmcs-21(3:28)2025}
+}
+
+@article{Benvenuti14,
+  author  = {Benvenuti, Luca and Bresolin, Davide and Collins, Pieter and Ferrari, Alberto and Geretti, Luca and Villa, Tiziano},
+  title   = {Assume-guarantee verification of nonlinear hybrid systems with {Ariadne}},
+  journal = {International Journal of Robust and Nonlinear Control},
+  year    = {2014},
+  volume  = {24},
+  number  = {4},
+  pages   = {699--724},
+  doi     = {10.1002/rnc.2914}
+}

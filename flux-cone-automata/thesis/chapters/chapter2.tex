@@ -1,0 +1,50 @@
+%%-----------------Chapter 2---------------------------
+\chapter{Systems Biology Preliminaries}\label{chap:sys}
+
+\section{Reaction Modelling Fundamentals}
+
+% use enzyme kinetics book for this section
+% show derivation of michaelis-mentens from general reaction formulation
+
+\subsection{General-Case Dynamics}
+
+\subsection{Michaelis-Menten Kinetics}
+
+\subsection{Other Steady-State Reaction Mechanisms}
+
+\section{Systems Biology Techniques}
+
+\subsection{Flux Balance Analysis}
+Flux balance analysis (FBA) presents a simple but powerful technique for calculating the steady-state fluxes for an organism, given the stoichiometry under constraints that follow from the metabolic network topology, the genetics of the organism, the properties of the growth medium and sometimes from physico-chemical laws. As a metabolic flux represents the rate of a corresponding reaction, there are usually bounds (thermodynamic, kinetic, or biological) on the rate at which the reaction can occur. The combinations of fluxes that satisfy the steady-state requirement while also respecting the established bounds form a convex polytope called the \textit{flux cone} or \textit{flux space}. Since an unlimited number of valid flux vectors exist within the flux cone (a specific assignment to each flux from the stoichiometric matrix should be called a \textit{flux vector}), FBA seeks to find the flux vector that maximizes a given objective function. The objective function usually represents a biologically relevant property, like biomass production.
+
+More formally, FBA describes a mixed-integer linear programming problem with the following conditions: With the internal stoichiometry of the organism given as the matrix $S \in \mathbb{R}^{M \times N}$, where each row represents the internal concentration of a metabolite $C_1, C_2, ... C_M$ and each column represents the value of a specific reaction/exchange flux, where one must solve for the flux vector $v = [R_1, R_2, ..., R_i, J_1, J_2, ... J_j] \in \mathbb{R}^N$ with respect to the bounds $v \leq v_{max}$ and $v_{min} \leq v$, given the objective function $G(v)$, such that:
+
+\begin{multline*}
+    \\
+    Arg \; max \; G(v)\\
+    S \cdot v = 0 \\
+    [v_{min}]_1 \leq R_1 \leq [v_{max}]_1 \\
+    [v_{min}]_2 \leq R_2 \leq [v_{max}]_2 \\
+    ... \\
+    [v_{min}]_i \leq R_i \leq [v_{max}]_i \\
+    [v_{min}]_{i+1} \leq J_1 \leq [v_{max}]_{i+1}\\
+    [v_{min}]_{i+2} \leq J_2 \leq [v_{max}]_{i+2} \\
+    ...\\
+    [v_{min}]_{i+j} \leq J_j \leq [v_{max}]_{i+j} \\
+\end{multline*}
+
+%The variant of FBA where additional thermodynamic constraints are available and imposed on individual reactions is known as energy balance analysis.
+
+\subsection{Dynamic Flux Balance Analysis}
+While FBA solves for the flux values that satisfy the biological constraints also maximizing the objective function, that alone is not enough to calculate the trajectory of an organism through time. FBA can be used to examine dynamic processes, e.g. microbial growth in batch cultures, by combining FBA with an iterative approach based on a quasi-steady-state assumption. This extension of FBA is known as static optimization–based dynamic FBA or simply dynamic FBA \cite{Becker07}. In this approach, the time horizon is divided into equally-spaced, discrete intervals of size $\Delta t$. FBA is used to solve for growth, nutrient uptake and by-product secretion rates at the beginning of each time step. The quasi-steady state assumptions are made -- these rates are assumed to be fixed for the duration of the time step -- and the changes in the biomass and nutrient concentrations are calculated by integrating the concentration dynamics (as function of the rates) over the time-step. These updated concentrations are then used to calculate the maximum uptake rates for the next time step. This iterative procedure thus allows the simulation of batch experiments. %Thus, dynamic FBA (dFBA) generalizes the FBA approach by performing a consecutive sequence of FBAs for an organism. This is calculated across a discretized time horizon, with external concentrations of metabolites (in the simulated medium) updated after the optimal flux vector has been computed for each time-step. 
+
+\subsection{Elementary Mode Analysis}
+Elementary Mode Analysis is a computational tool to identify the structure of a metabolic network that links the cellular phenotype to the corresponding genotype (Trinh et al., Appl Microbiol Biotechnol. 2009 Jan; 81(5): 813–826.). The analysis can decompose an intricate metabolic network constituted of highly interconnected reactions into uniquely organized pathways. These pathways consisting of a minimal set of enzymes that can support steady state operation of cellular metabolism represent independent cellular physiological states. Such pathway definition provides a rigorous basis to systematically characterize cellular phenotypes, metabolic network regulation, robustness, and fragility that facilitate understanding of cell physiology and implementation of metabolic engineering strategies.
+
+\subsection{Extreme Pathways Analysis}
+Extreme pathways for a genome scale metabolic network constitute a unique and minimal set of vectors that completely characterize the steady-state capabilities of the network (Papin et al., Genome Res. 2002 Dec; 12(12): 1889–1900.). In other words, extreme pathways are mathematically derived vectors that can be used to characterize the phenotypic potential of a defined metabolic network (Schilling et al. 1999, 2000). Papin and co-workers have developed a framework to mathematically characterize extreme pathway length and to study how individual reactions participate in the extreme pathway structure of a network. These researchers have established that for any particular metabolic network, there is always a unique set of extreme pathways available (Papin, Jason; Nathan Price; Bernhard O Palsson (August 2004). "Comparison of network-based pathway analysis methods". Trends in Biotechnology. 22 (8): 400–405.). Moreover, a constraint-based approach has been developed in which constraints like mass balance and maximum reaction rates enable the demarcation of a ‘solution space’ where all the feasible options fall within. This constraint-based approach is supplemented by a kinetic modeling approach that enables the determination of a single solution in the extreme pathway solution space. This approach was initially applied to understand the human red blood cell metabolism. Thus, extreme pathway analysis can be used to understand the regulatory mechanisms of a metabolic network in further detail.
+
+\subsection{Metabolic Control Analysis}
+Metabolic Control Analysis (MCA) is a mathematical framework to determine, quantitatively, the degree of control that a given enzyme exerts on flux and on the concentration of metabolites, thus substituting the intuitive, qualitative concept of rate limiting step (Moreno-Sanchez et al., J Biomed Biotechnol. 2008; 2008: 597913.). Thus, MCA helps to understand the underlying mechanisms by which a given enzyme exerts high or low control and why the control of the pathway is shared by several pathway enzymes and transporters. By applying MCA it is possible to identify the steps that should be modified to achieve a successful alteration of flux or metabolite concentration in pathways of biotechnological importance e.g., large scale metabolite production.
+
+% However these different constraint-based methods lack the theoretical rigor of the formal method-based model checking system. Hence, we try to frame the metabolism problem using a formal hybrid systems approach.

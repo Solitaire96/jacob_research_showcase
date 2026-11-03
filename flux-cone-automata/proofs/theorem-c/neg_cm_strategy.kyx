@@ -1,0 +1,72 @@
+ArchiveEntry "NC-m1 strategy beats greedy"
+/* For the review's cap c_m = max(0,min(100B, 19-2B-1.5G, 50G)), Y = 1, from (1,10): an admissible piecewise-constant
+   strategy reaches B(1) = 6473/2500 > 31/12 (>= greedy b(1), entry NC-m2). */
+/* Controls from neg/strategy.py (waste u = 2, g = 0 on [0, 21/50], then four segments of length 29/200 with g = u,
+   u rounded down).  Admissibility u <= c_m(B,G) is written as the three linear pieces (equivalent for u > 0) and is
+   checked by the ODE domain along every segment; G >= 0 throughout. */
+ProgramVariables
+  Real B; Real G; Real t; Real u; Real g;
+End.
+Problem
+  B = 1 & G = 10 & t = 0
+  ->
+  < { u := 2; g := 0;
+    {B' = g, G' = -u, t' = 1 & 0<=g & g<=u & G>=0 & u<=100*B & u<=19-2*B-3/2*G & u<=50*G}; ?(t = 21/50);
+    u := 303/100; g := u;
+    {B' = g, G' = -u, t' = 1 & 0<=g & g<=u & G>=0 & u<=100*B & u<=19-2*B-3/2*G & u<=50*G}; ?(t = 21/50 + 29/200);
+    u := 283/100; g := u;
+    {B' = g, G' = -u, t' = 1 & 0<=g & g<=u & G>=0 & u<=100*B & u<=19-2*B-3/2*G & u<=50*G}; ?(t = 21/50 + 2*29/200);
+    u := 66/25; g := u;
+    {B' = g, G' = -u, t' = 1 & 0<=g & g<=u & G>=0 & u<=100*B & u<=19-2*B-3/2*G & u<=50*G}; ?(t = 21/50 + 3*29/200);
+    u := 123/50; g := u;
+    {B' = g, G' = -u, t' = 1 & 0<=g & g<=u & G>=0 & u<=100*B & u<=19-2*B-3/2*G & u<=50*G}; ?(t = 1); }
+  > (t = 1 & B = 6473/2500 & B > 31/12)
+End.
+Tactic "solve each segment, instantiate its duration"
+  implyR(1); chase(1); solve(1); existsR("21/50", 1); andR(1); <( QE, andR(1); <( QE, (allR(1) | implyR(1))*; andR(1); <( QE, solve(1); existsR("29/200", 1); andR(1); <( QE, andR(1); <( QE, (allR(1) | implyR(1))*; andR(1); <( QE, solve(1); existsR("29/200", 1); andR(1); <( QE, andR(1); <( QE, (allR(1) | implyR(1))*; andR(1); <( QE, solve(1); existsR("29/200", 1); andR(1); <( QE, andR(1); <( QE, (allR(1) | implyR(1))*; andR(1); <( QE, solve(1); existsR("29/200", 1); andR(1); <( QE, andR(1); <( QE, (allR(1) | implyR(1))*; QE ) ) ) ) ) ) ) ) ) ) ) ) ) )
+End.
+End.
+
+ArchiveEntry "NC-m2 greedy upper bound"
+/* Greedy for c_m from (1,10), Y = 1, on the line P = P0 = 11: b' = c_m(b, 11 - b) = max(0, min(100b, 5/2 - b/2, 50(11-b))).
+   KeYmaera X 5.1.2 has no min/max in ODEs, so the ghost is the active piece b' = 5/2 - b/2; entry NC-m3 proves that
+   this piece IS the value of c_m on the line for b in [1, 5], and this entry proves b stays in [1, 5] on the run, so the
+   ghost is the greedy (uniqueness of the ODE solution -- the one hand step of this control).
+   Claim: b(t) <= U(t) = 1 + 2t - t^2/2 + t^3/12, so b(1) <= 31/12 (true value 5 - 4 exp(-1/2) = 2.5739). */
+ProgramVariables
+  Real b; Real t;
+End.
+Problem
+  b = 1 & t = 0
+  ->
+  [{b' = 5/2 - b/2, t' = 1}] (1 <= b & b <= 5 & 1 + 2*t - t^2/2 + t^3/12 - b >= 0 & (t = 1 -> b <= 31/12))
+End.
+Tactic "dbx"
+  implyR(1);
+  dC("t >= 0", 1); <(
+    dC("5 - b >= 0", 1); <(
+      dC("b - 1 >= 0", 1); <(
+        dC("1 + 2*t - t^2/2 + t^3/12 - b >= 0", 1); <( dW(1); QE, dbx("-1/2", 1) ),
+        dI(1)
+      ),
+      dbx("-1/2", 1)
+    ),
+    dI(1)
+  )
+End.
+End.
+
+ArchiveEntry "NC-m3 active piece"
+/* On the line P = 11 (G = 11 - b), for 1 <= b <= 5: min(100b, 19 - 2b - 1.5G, 50G) = 5/2 - b/2 >= 0, so
+   c_m(b, 11 - b) = 5/2 - b/2 there. */
+ProgramVariables
+  Real b;
+End.
+Problem
+  1 <= b & b <= 5 ->
+  ( 19 - 2*b - 3/2*(11 - b) = 5/2 - b/2 & 5/2 - b/2 <= 100*b & 5/2 - b/2 <= 50*(11 - b) & 5/2 - b/2 >= 0 )
+End.
+Tactic "QE"
+  QE
+End.
+End.

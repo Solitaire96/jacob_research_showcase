@@ -1,0 +1,24 @@
+ArchiveEntry "P4b: one run of Organism 2 alone is one dFBA step (soundness)"
+Definitions
+  Real Vm = 20;
+  Real Km = 1/20;
+  Real dt = 1/10;
+  Bool capok(Real Q, Real x, Real Bt) <-> ( Q*(Km+x) + Vm*x*dt >= 0 & Q*Bt + x >= 0 );
+End.
+ProgramVariables
+  Real A, B, C, Bio2, Q2A, Q2B, Q2G, xA, xB, xC, E2, t3, b2;
+End.
+Problem
+  A >= 0 & B >= 0 & C >= 0 & Bio2 > 0
+  ->
+  [{
+     xA := A; xB := B; xC := C; b2 := Bio2;
+     Q2A := 0; Q2B := 0; Q2G := 0; E2 := 1; t3 := 0;
+     {A' = -Bio2, B' = -Bio2, C' = Bio2, Q2A' = -1, Q2B' = -1, Q2G' = 1/50, E2' = E2/50, t3' = 1}@invariant(E2>0 & Bio2>0 & t3>=0 & Q2A = -t3 & Q2B = -t3 & Q2G = t3/50 & A = xA - Bio2*t3 & B = xB - Bio2*t3 & C = xC + Bio2*t3 & Bio2 = b2);
+     ?( capok(Q2A, xA, Bio2) & capok(Q2B, xB, Bio2) );
+     Bio2 := Bio2*E2;
+   }]
+  ( t3>=0 & capok(-t3, xA, b2) & capok(-t3, xB, b2)
+  & A = xA - b2*t3 & B = xB - b2*t3 & C = xC + b2*t3 & Q2G = t3/50 & Bio2 = b2*E2 & E2 > 0 )
+End.
+End.

@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checking the Debaters</title>
+<meta name="description" content="A multi-agent LLM system for venture diligence: on real data rooms, debate agents invented evidence to unlock INVEST verdicts. Code-checked citations stopped it.">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#fcfcfb; --surface:#ffffff; --line:#e4e3df; --grid:#ecebe7;
+  --ink:#0b0b0b; --ink-2:#52514e; --ink-3:#7a7975;
+  --s1:#2a78d6; --s2:#eb6834; --s2-fill:rgba(235,104,52,.14);
+  --max:68rem;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#1a1a19; --surface:#222221; --line:#33332f; --grid:#2c2c29;
+    --ink:#f0efec; --ink-2:#c3c2b7; --ink-3:#8f8e86;
+    --s1:#3987e5; --s2:#d95926; --s2-fill:rgba(217,89,38,.18);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#1a1a19; --surface:#222221; --line:#33332f; --grid:#2c2c29;
+  --ink:#f0efec; --ink-2:#c3c2b7; --ink-3:#8f8e86;
+  --s1:#3987e5; --s2:#d95926; --s2-fill:rgba(217,89,38,.18);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:var(--max);margin:0 auto;padding:40px 16px 64px}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:-16px 0 28px;overflow-x:auto}
+.tabs a{padding:8px 12px 9px;color:var(--ink-3);text-decoration:none;font-size:14px;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs a:hover{color:var(--ink)}
+.tabs a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
+h1{font-size:clamp(28px,4vw,40px);line-height:1.1;margin:0 0 8px;letter-spacing:-.01em}
+h2{font-size:20px;margin:40px 0 10px}
+p{margin:0 0 12px;max-width:62ch}
+.lede{font-size:18px;color:var(--ink-2);max-width:66ch}
+.meta{color:var(--ink-3);font-size:14px;margin-bottom:28px}
+.meta a{color:inherit}
+a{color:var(--s1)}
+.grid{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:800px){.grid{grid-template-columns:1.6fr 1fr}}
+.grid2{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:800px){.grid2{grid-template-columns:1fr 1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 18px 14px}
+.card h3{margin:0 0 4px;font-size:15px;font-weight:600}
+.card .sub{color:var(--ink-3);font-size:13px;margin:0 0 10px}
+.card p{font-size:15px}
+.stat{display:flex;flex-direction:column;justify-content:center}
+.stat .n{font-size:56px;line-height:1;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stat .l{color:var(--ink-2);font-size:14px;margin-top:8px;max-width:30ch}
+.stat .row{display:flex;gap:18px;margin-top:18px;padding-top:14px;border-top:1px solid var(--line);flex-wrap:wrap}
+.stat .row div{font-size:13px;color:var(--ink-3);max-width:16ch}
+.stat .row b{display:block;font-size:20px;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--ink-2);margin:4px 0 6px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:14px;height:10px;border-radius:2px;display:inline-block}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+svg{width:100%;height:auto;display:block;overflow:visible}
+.axis text{fill:var(--ink-3);font-size:12px}
+.axis line,.axis path{stroke:var(--grid);stroke-width:1}
+.axis .base{stroke:var(--line)}
+.lab{font-size:12px;fill:var(--ink-2)}
+.lab.b{font-weight:600;fill:var(--ink)}
+.tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:13px;line-height:1.35;box-shadow:0 4px 14px rgba(0,0,0,.08);white-space:nowrap;transform:translate(-50%,calc(-100% - 10px));opacity:0;transition:opacity .08s;z-index:2}
+.tip b{font-variant-numeric:tabular-nums}
+.wrap{position:relative}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink-3);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tag{display:inline-block;font-size:12px;padding:1px 7px;border:1px solid var(--line);border-radius:999px;color:var(--ink-2);white-space:nowrap}
+.tag.ok{border-color:var(--s1);color:var(--s1)}
+.tag.no{border-color:var(--s2);color:var(--s2)}
+@media (max-width:420px){.tag{white-space:normal}th,td{padding-left:6px;padding-right:6px}}
+code,.mono{font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+ul{padding-left:20px;max-width:66ch}
+li{margin-bottom:6px}
+.refs{padding-left:22px;font-size:14px;color:var(--ink-2);line-height:1.5}
+.refs li{margin:0 0 6px}
+.refs a{overflow-wrap:anywhere}
+.foot{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);color:var(--ink-3);font-size:13px}
+details{margin-top:10px}
+summary{cursor:pointer;color:var(--ink-2);font-size:14px}
+.pipe{display:grid;gap:8px;grid-template-columns:repeat(6,minmax(0,1fr));margin-top:12px}
+@media(max-width:800px){.pipe{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--ink-2);line-height:1.4}
+.step b{display:block;color:var(--ink);font-size:13px;margin-bottom:2px}
+.step .ph{color:var(--ink-3);font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+.step.risk{border-color:var(--s2)}
+.lane{margin-top:8px;border:1px dashed var(--s1);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--ink-2)}
+.lane b{color:var(--s1)}
+.ex td:first-child{width:46%}
+.ex .q{font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ink)}
+.ex mark{background:var(--s2-fill);color:inherit;padding:0 1px;border-radius:2px}
+
+.scale{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:10px;background:var(--surface);margin:0 0 20px}
+.scale div{padding:14px 16px;border-left:1px solid var(--line);font-size:13px;color:var(--ink-3);line-height:1.35}
+.scale div:first-child{border-left:0}
+.scale b{display:block;font-size:24px;line-height:1.1;color:var(--ink);font-weight:700;letter-spacing:-.01em;font-variant-numeric:tabular-nums;margin-bottom:4px}
+@media(max-width:800px){.scale{grid-template-columns:repeat(2,minmax(0,1fr))}.scale div{border-left:0;border-top:1px solid var(--line)}.scale div:nth-child(-n+2){border-top:0}.scale div:nth-child(even){border-left:1px solid var(--line)}}
+.chain{list-style:none;margin:6px 0 0;padding:0;counter-reset:c}
+.chain li{position:relative;padding:0 0 14px 34px;margin:0;max-width:none}
+.chain li:before{counter-increment:c;content:counter(c);position:absolute;left:0;top:1px;width:22px;height:22px;border-radius:50%;background:var(--surface);border:1px solid var(--line);font-size:12px;line-height:20px;text-align:center;color:var(--ink-3)}
+.chain li:after{content:"";position:absolute;left:11px;top:25px;bottom:2px;width:1px;background:var(--line)}
+.chain li:last-child:after{display:none}
+.chain .who{font-size:12px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em}
+.chain blockquote{margin:4px 0 0;padding:8px 12px;border-left:3px solid var(--line);background:var(--bg);font-size:14px;color:var(--ink);border-radius:0 6px 6px 0}
+.chain .red{background:var(--ink-3);color:var(--surface);border-radius:3px;padding:0 4px;font-size:12px;white-space:nowrap}
+.chain .bad{border-left-color:var(--s2)}
+.chain li.check:before{border-color:var(--s1);color:var(--s1)}
+.zero{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.zero span{font:13px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid var(--s1);border-radius:6px;padding:3px 8px;color:var(--ink)}
+.zero span b{color:var(--s1)}
+.new{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:800px){.new{grid-template-columns:repeat(2,1fr)}}
+.new .card p{font-size:14px;color:var(--ink-2);margin:0}
+.new .card .vs{font-size:12px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+/* tabs: wrap on narrow screens so every project stays visible */
+@media (max-width:600px){.tabs{flex-wrap:wrap;overflow-x:visible}.tabs a{padding:8px 9px 9px}}
+</style>
+</head>
+<body>
+<main>
+<nav class="tabs" aria-label="Projects">
+  <a href="./">Flux-cone automata</a>
+  <a href="debaters.html" aria-current="page">Checking the debaters</a>
+  <a href="decumulation.html">Deep-RL decumulation</a>
+</nav>
+
+<h1>Checking the debaters</h1>
+<p class="lede">Run on real venture data rooms, LLM debate agents invented the evidence that unlocked INVEST verdicts, and the agent holding the veto accepted it. Putting the documents in every turn and checking every quote in code, with a checker that survives PDF noise, stopped it.</p>
+<p class="meta">Jacob Bowers · multi-agent diligence system and working paper, 2026 · <a href="https://github.com/Solitaire96/jacob_research_showcase/tree/main/checking-the-debaters">code, 124 tests and a sample data room on GitHub</a></p>
+
+<div class="scale" role="list">
+  <div role="listitem"><b>7</b>real venture data rooms (confidential; not in the repo)</div>
+  <div role="listitem"><b>6</b>debating agents, plus a referee and a quant auditor, over 6 phases</div>
+  <div role="listitem"><b>8,406</b>quotes audited across 27 stored runs</div>
+  <div role="listitem"><b>6,800</b>lines of Python, plus 1,800 lines of tests (124 passing)</div>
+  <div role="listitem"><b>3</b>interchangeable model backends</div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h3>Exhibit: how a veto was lifted on evidence that doesn't exist</h3>
+    <p class="sub">One of the early runs, original design (documents shown to the agents in the first phase only). Model output, quoted verbatim: words in brackets replace deal-identifying ones (except [RESOLVED], the model&rsquo;s own tag), and &hellip; marks a cut.</p>
+    <ol class="chain">
+      <li><span class="who">Risk Agent objection, scored 1 / 10</span>
+        <blockquote>The potential for <span class="red">[a product failure]</span> &hellip; creates a catastrophic liability profile that is likely uninsurable &hellip;</blockquote></li>
+      <li><span class="who">Panel answer</span>
+        <blockquote class="bad">&hellip; based on a preliminary quote from <span class="red">[an insurer]</span> noted in Doc 6, Appendix B.</blockquote></li>
+      <li><span class="who">Risk Agent ruling</span>
+        <blockquote class="bad">[RESOLVED] &hellip; the patented fail-safe systems have been independently verified by <span class="red">[a laboratory]</span>, and the risk is considered insurable per an LOI from <span class="red">[an insurer]</span>.</blockquote></li>
+      <li><span class="who">Final verdict</span>
+        <blockquote class="bad"><b>INVEST</b></blockquote></li>
+      <li class="check"><span class="who">Search of every document in the data room, afterwards</span>
+        <div class="zero"><span>&ldquo;insur&rdquo; <b>0</b></span><span>insurer <b>0</b></span><span>laboratory <b>0</b></span><span>&ldquo;Appendix B&rdquo; <b>0</b></span><span>Doc 6 <b>does not exist</b></span></div></li>
+    </ol>
+  </div>
+
+  <div class="card stat">
+    <div class="n">9 / 9</div>
+    <div class="l">INVEST verdicts in the early runs rested on evidence absent from every document in the deal: insurance quotes, laboratory verifications, contracts and executives that do not exist.</div>
+    <div class="row">
+      <div><b>0 of 20</b>later full-system runs repeated any of it, across two model families</div>
+      <div style="max-width:none"><b>9.7% → 0.1%</b>gpt-oss-120b fabricated quotes on held-out deals</div>
+    </div>
+  </div>
+</div>
+
+<h2>What is new</h2>
+<div class="new">
+  <div class="card"><div class="vs">vs AlphaAgents (Zhao et al., 2025)</div><p>Specialist agents debate equity decisions over public data. Here the same pattern runs on private venture data rooms, where the failure that matters is invented evidence: every quote is checked against the documents in code, stated figures enter the deal math only through a verified fact ledger, and the risk veto is gated on verified quotes.</p></div>
+  <div class="card"><div class="vs">vs Khan et al. (2024)</div><p>Their verified-quote tool checks debaters' quotes by exact match against one clean story. Venture data rooms are many noisy PDFs, where exact matching finds 31.5% of real quotes. The checker here tolerates extraction noise and stays strict on figures, names, negations and qualifiers.</p></div>
+  <div class="card"><div class="vs">vs Irving et al. (2018)</div><p>Debate as oversight assumes a judge who knows less than the debaters. Here that judge holds a veto over a real decision, and a controlled replay tests what it needs: document sight, displayed checks, or a gate enforced in code.</p></div>
+  <div class="card"><div class="vs">vs DIALECTIC (Bae et al., 2026)</div><p>The closest system for startups gathers facts into a question tree and ranks deals with debate-refined arguments; it does not describe checking quoted evidence against the source documents. Here every quote and every stated figure is checked in code, and deal arithmetic is computed, not generated.</p></div>
+</div>
+
+<h2>The system</h2>
+<p>Six agents score the deal, argue it in two adversarial rounds audited by a referee that cannot see the documents, face the Risk Agent's objections, and vote. Every statement passes through the citation checker before any other agent reads it.</p>
+<div class="pipe" role="list">
+  <div class="step" role="listitem"><span class="ph">Phase 0</span><b>Fact ledger</b>Figures enter only if their quote is found and contains the value; deal math is computed by functions</div>
+  <div class="step" role="listitem"><span class="ph">Phase 1</span><b>Scorecards</b>Six agents score the deal independently, every rationale quoted</div>
+  <div class="step" role="listitem"><span class="ph">Phase 2</span><b>Openings</b>Panel first, Risk Agent last, having heard them</div>
+  <div class="step" role="listitem"><span class="ph">Phase 3</span><b>Cross-examination ×2</b>A document-blind referee names logical fouls and presses for rebuttals</div>
+  <div class="step risk" role="listitem"><span class="ph">Phase 4</span><b>Risk gauntlet</b>Objections, panel answers, ruling; a gate downgrades any "resolved" without a verified quote</div>
+  <div class="step" role="listitem"><span class="ph">Phase 5</span><b>Vote</b>Risk veto plus 3 of 5 panel votes to INVEST</div>
+</div>
+<div class="lane"><b>On every turn:</b> the full documents in the prompt; every «quote» checked against them in code and annotated (found / NOT FOUND) before the next agent reads it; Quant arithmetic re-computed in code.</div>
+
+<h2>A checker that survives PDF noise</h2>
+<div class="grid2">
+  <div class="card wrap">
+    <h3>Share of 8,406 logged quotes found in the documents</h3>
+    <p class="sub">27 stored runs, re-scored offline. Exact matching fails on real data rooms because extraction mangles the text: it rejects quotes that are really there.</p>
+    <svg id="c2" viewBox="0 0 520 200" role="img" aria-labelledby="c2t"><title id="c2t">Raw exact match 31.5 percent, whitespace-normalised exact 59.4 percent, tolerant checker as used in the runs 90.5 percent, tolerant checker tightened afterwards 88.4 percent</title></svg>
+    <div class="tip" id="tip2"></div>
+  </div>
+  <div class="card">
+    <h3>What it forgives, and what it never does</h3>
+    <p class="sub">Cases from the regression suite, shown on the fictional sample data room. Highlight: what differs between quote and extracted text.</p>
+    <div class="tscroll"><table class="ex">
+      <thead><tr><th>Extracted text vs quote</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td class="q">soil scient<mark>E</mark>ist</td><td><span class="tag ok">accepted</span> watermark letter inside a word</td></tr>
+        <tr><td class="q">48,0 <mark>ww</mark> 00 readings</td><td><span class="tag ok">accepted</span> number split by a watermark line</td></tr>
+        <tr><td class="q">non-<mark>⏎</mark>dilutive</td><td><span class="tag ok">accepted</span> hyphenation across a line</td></tr>
+        <tr><td class="q">$<mark>2.4</mark>M → $<mark>24</mark>M</td><td><span class="tag no">rejected</span> moved decimal point</td></tr>
+        <tr><td class="q">has <mark>not</mark> signed → has signed</td><td><span class="tag no">rejected</span> dropped negation</td></tr>
+        <tr><td class="q"><mark>partial</mark> success → success</td><td><span class="tag no">rejected</span> dropped qualifier</td></tr>
+        <tr><td class="q">Halvors<mark>o</mark>n → Halvors<mark>e</mark>n</td><td><span class="tag no">rejected</span> name not spelled that way anywhere</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</div>
+
+<h2>Fabrication on deals held out from development</h2>
+<div class="grid2">
+  <div class="card wrap">
+    <h3>Fabricated quotes, original design vs full system</h3>
+    <p class="sub">Three deals not used while the prompts were developed. Fabricated: names a person, firm or number absent from the documents.</p>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--ink-3)"></i>Original design</span>
+      <span><i class="dot" style="background:var(--s1)"></i>Full system</span>
+    </div>
+    <svg id="c3" viewBox="0 0 520 170" role="img" aria-labelledby="c3t"><title id="c3t">gpt-oss-120b: 9.7 percent of quotes fabricated in the original design, 0.1 percent in the full system. qwen-3.8-27b: 0.1 percent and 0.3 percent.</title></svg>
+    <div class="tip" id="tip3"></div>
+    <p style="margin-top:8px;font-size:14px;color:var(--ink-2)">Classified by rule, and the two conditions ran on different commits. The smaller model barely fabricated either way.</p>
+  </div>
+  <div class="card wrap">
+    <h3>Quotes verified in the full system, four main deals</h3>
+    <p class="sub">One run per deal and model, documents and checks on every turn. Right: the verdict each run reached.</p>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--s2)"></i>gpt-oss-120b</span>
+      <span><i class="dot" style="background:var(--s1)"></i>qwen-3.8-27b</span>
+    </div>
+    <svg id="c4" viewBox="0 0 520 200" role="img" aria-labelledby="c4t"><title id="c4t">Quotes verified, gpt-oss then qwen: D1 73.3 and 92.0 percent; D2 98.8 and 99.7; D3 84.5 and 90.5; D4 96.2 and 99.8. qwen verified more on every deal.</title></svg>
+    <div class="tip" id="tip4"></div>
+    <p style="margin-top:8px;font-size:14px;color:var(--ink-2)">The veto is not a blanket block: in three of eight runs every objection was answered with verified quotes and the deal went to the panel vote.</p>
+  </div>
+</div>
+
+<h2>What the judge needs: sight or checks, not a gate</h2>
+<div class="card wrap">
+  <h3>Debates in which the Risk Agent resolved an objection without a verified quote, out of 7</h3>
+  <p class="sub">The final ruling replayed 252 times on saved debates under one frozen commit (2 models × 6 arms × 3 repeats). Blind and unchecked, the judge copied a panelist's fabricated quotes into its ruling. Either showing it the documents or showing it the check results stopped that; the code-enforced gate changed none of the 252 verdicts.</p>
+  <div class="legend">
+    <span><i class="sw" style="background:var(--s2)"></i>Judge cannot see the documents</span>
+    <span><i class="sw" style="background:var(--s1)"></i>Judge sees the documents</span>
+    <span><i class="sw" style="background:transparent;border:1.5px dashed var(--ink-3)"></i>Before the code gate</span>
+  </div>
+  <svg id="c1" style="max-width:680px" viewBox="0 0 640 300" role="img" aria-labelledby="c1t"><title id="c1t">Debates with an unverified resolution, out of 7. Blind judge: unchecked 3, checks shown 0, code gate 0. Sighted judge: unchecked 1, checks shown 4, code gate 0 after the gate and 1 before it.</title></svg>
+  <div class="tip" id="tip1"></div>
+  <p style="margin-top:8px;font-size:14px;color:var(--ink-2)">A sighted judge quotes the documents directly, so its few misses are its own near-quotes, not copied fabrications.</p>
+</div>
+
+<p style="margin-top:20px">The same protocol on the public QuALITY reading-comprehension benchmark (Pang et al., 2022) is in <a href="https://github.com/Solitaire96/jacob_research_showcase/blob/main/checking-the-debaters/RESULTS.md">RESULTS.md</a>, with the status of every number on this page.</p>
+
+<h2>Scope</h2>
+<ul>
+  <li>The checker establishes that quoted words exist in the documents, not that they support the claim; in one run the Risk Agent passed the gate with a real quote that answered a different objection.</li>
+  <li>No investment outcomes yet: DIALECTIC backtests against real outcomes from five funds; this work does not.</li>
+  <li>The data rooms are confidential, so deals appear as D1–D7 and results as counts; the public code runs end to end on a fictional data room.</li>
+</ul>
+
+<h2>References</h2>
+<ol class="refs">
+  <li>Bae, J. Y., Malberg, S., Galang, J., Retterath, A. &amp; Groh, G. (2026). DIALECTIC: A multi-agent system for startup evaluation. <a href="https://arxiv.org/abs/2603.12274">arXiv:2603.12274</a></li>
+  <li>Irving, G., Christiano, P. &amp; Amodei, D. (2018). AI safety via debate. <a href="https://arxiv.org/abs/1805.00899">arXiv:1805.00899</a></li>
+  <li>Khan, A., Hughes, J., Valentine, D., Ruis, L., Sachan, K., Radhakrishnan, A., Grefenstette, E., Bowman, S. R., Rocktäschel, T. &amp; Perez, E. (2024). Debating with more persuasive LLMs leads to more truthful answers. <i>ICML 2024</i>, PMLR 235. <a href="https://arxiv.org/abs/2402.06782">arXiv:2402.06782</a></li>
+  <li>Pang, R. Y. et al. (2022). QuALITY: Question answering with long input texts, yes! <i>NAACL 2022</i>. <a href="https://aclanthology.org/2022.naacl-main.391">aclanthology.org/2022.naacl-main.391</a></li>
+  <li>Zhao, T., Lyu, J., Jones, S., Garber, H., Pasquali, S. &amp; Mehta, D. (2025). AlphaAgents: Large language model based multi-agents for equity portfolio constructions. <a href="https://arxiv.org/abs/2508.11152">arXiv:2508.11152</a></li>
+</ol>
+
+<details>
+  <summary>Data behind the charts (table view)</summary>
+  <div class="tscroll" style="margin-top:8px"><table>
+    <thead><tr><th>Chart</th><th>Series</th><th>Value</th></tr></thead>
+    <tbody id="tbl"></tbody>
+  </table></div>
+</details>
+
+<p class="foot">Source: <code>checking-the-debaters/RESULTS.md</code> in the repository. Deals are labelled D1–D7.</p>
+</main>
+
+<script>
+(function(){
+  const NS='http://www.w3.org/2000/svg';
+  const el=(n,a,p)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e;};
+  const txt=(p,a,s)=>{const t=el('text',a,p);t.textContent=s;return t;};
+  const rowsOut=[];
+  function tipper(svg,tip,W,H){
+    const wrap=svg.parentNode;
+    return {show(html,X,Y){const r=svg.getBoundingClientRect(),wr=wrap.getBoundingClientRect();
+      tip.innerHTML=html;tip.style.left=(X/W*r.width+(r.left-wr.left))+'px';tip.style.top=(Y/H*r.height+(r.top-wr.top))+'px';tip.style.opacity=1;},
+      hide(){tip.style.opacity=0;}};
+  }
+  function hover(node,tp,html,X,Y){
+    node.addEventListener('mouseenter',()=>tp.show(html,X,Y));
+    node.addEventListener('mouseleave',()=>tp.hide());
+    node.addEventListener('touchstart',()=>tp.show(html,X,Y),{passive:true});
+  }
+
+  // ---- chart 1: replay, debates with an unverified resolution (of 7)
+  (function(){
+    const svg=document.getElementById('c1'),tp=tipper(svg,document.getElementById('tip1'),640,300);
+    const W=640,H=300,m={l:168,r:150,t:6,b:34},rows=[
+      {g:'Blind',k:'unchecked',v:3,runs:'10 / 42',inv:'13 / 42',c:'var(--s2)'},
+      {g:'Blind',k:'checks shown',v:0,runs:'0 / 42',inv:'10 / 42',c:'var(--s2)'},
+      {g:'Blind',k:'checks + code gate',v:0,runs:'0 / 42',inv:'9 / 42',c:'var(--s2)',gate:'gate fired on 0 / 7'},
+      {g:'Sighted',k:'unchecked',v:1,runs:'1 / 42',inv:'15 / 42',c:'var(--s1)'},
+      {g:'Sighted',k:'checks shown',v:4,runs:'4 / 42',inv:'12 / 42',c:'var(--s1)'},
+      {g:'Sighted',k:'checks + code gate',v:0,pre:1,runs:'0 / 42 (2 / 42 before)',inv:'13 / 42',c:'var(--s1)',gate:'gate fired on 1 / 7'}];
+    const bh=24,gap=12,groupGap=18;
+    const x=v=>m.l+(v/7)*(W-m.l-m.r);
+    const yOf=i=>m.t+i*(bh+gap)+(i>=3?groupGap:0);
+    const ax=el('g',{class:'axis'},svg);
+    const yEnd=yOf(5)+bh+8;
+    [0,1,2,3,4,5,6,7].forEach(v=>{el('line',{x1:x(v),x2:x(v),y1:m.t-4,y2:yEnd,class:v?'':'base'},ax);txt(ax,{x:x(v),y:yEnd+16,'text-anchor':'middle'},v);});
+    txt(ax,{x:(m.l+W-m.r)/2,y:yEnd+32,'text-anchor':'middle'},'debates with an unverified resolution (of 7)');
+    rows.forEach((r,i)=>{
+      const Y=yOf(i);
+      txt(svg,{class:'lab'+(i%3===0?' b':''),x:m.l-10,y:Y+bh/2+4,'text-anchor':'end'},(i%3===0?r.g+' · ':'')+r.k);
+      if(r.pre)el('rect',{x:m.l,y:Y,width:x(r.pre)-m.l,height:bh,fill:'none',stroke:'var(--ink-3)','stroke-dasharray':'3 3',rx:3},svg);
+      const w=Math.max(x(r.v)-m.l,r.v?0:2);
+      const b=el('rect',{x:m.l,y:Y,width:w,height:bh,fill:r.c,rx:3},svg);
+      const lt=txt(svg,{class:'lab b',x:x(Math.max(r.v,r.pre||0))+8,y:Y+bh/2+4},r.v+' / 7');
+      if(r.gate){const ts=el('tspan',{dx:10,'font-weight':400,fill:'var(--ink-3)'},lt);ts.textContent=r.gate;}
+      const hit=el('rect',{x:0,y:Y-3,width:W,height:bh+6,fill:'transparent'},svg);
+      hover(hit,tp,`${r.g} judge, ${r.k}<br>debates <b>${r.v} / 7</b>${r.pre?' (1 / 7 before the gate)':''}<br>runs <b>${r.runs}</b><br>INVEST <b>${r.inv}</b>`,x(Math.max(r.v,r.pre||0,1)),Y);
+      rowsOut.push(['Replay',`${r.g}, ${r.k}`,`${r.v} / 7 debates; runs ${r.runs}; INVEST ${r.inv}`]);
+    });
+  })();
+
+  // ---- chart 2: checker regimes
+  (function(){
+    const svg=document.getElementById('c2'),tp=tipper(svg,document.getElementById('tip2'),520,200);
+    const W=520,H=200,m={l:200,r:46,t:6,b:30},rows=[
+      {k:'Raw exact substring',v:31.5,n:'2,647',c:'var(--ink-3)'},
+      {k:'Whitespace-normalised exact',v:59.4,n:'4,994',c:'var(--ink-3)'},
+      {k:'Tolerant checker (as run)',v:90.5,n:'7,606',c:'var(--s1)'},
+      {k:'Tolerant, tightened after',v:88.4,n:'7,427',c:'var(--s1)'}];
+    const bh=24,gap=14,x=v=>m.l+(v/100)*(W-m.l-m.r);
+    const ax=el('g',{class:'axis'},svg),yEnd=m.t+rows.length*(bh+gap)-gap+6;
+    [0,25,50,75,100].forEach(v=>{el('line',{x1:x(v),x2:x(v),y1:m.t-4,y2:yEnd,class:v?'':'base'},ax);txt(ax,{x:x(v),y:yEnd+16,'text-anchor':'middle'},v+'%');});
+    rows.forEach((r,i)=>{const Y=m.t+i*(bh+gap);
+      txt(svg,{class:'lab',x:m.l-10,y:Y+bh/2+4,'text-anchor':'end'},r.k);
+      el('rect',{x:m.l,y:Y,width:x(r.v)-m.l,height:bh,fill:r.c,rx:3},svg);
+      txt(svg,{class:'lab b',x:x(r.v)+6,y:Y+bh/2+4},r.v+'%');
+      const hit=el('rect',{x:0,y:Y-3,width:W,height:bh+6,fill:'transparent'},svg);
+      hover(hit,tp,`${r.k}<br><b>${r.n}</b> of 8,406 quotes (<b>${r.v}%</b>)`,x(r.v),Y);
+      rowsOut.push(['Checker',r.k,`${r.n} / 8,406 (${r.v}%)`]);});
+  })();
+
+  // ---- chart 3: held-out fabrication, dumbbell
+  (function(){
+    const svg=document.getElementById('c3'),tp=tipper(svg,document.getElementById('tip3'),520,170);
+    const W=520,H=170,m={l:120,r:30,t:16,b:34},rows=[
+      {k:'gpt-oss-120b',a:9.7,an:'56 / 580',e:0.1,en:'1 / 694'},
+      {k:'qwen-3.8-27b',a:0.1,an:'1 / 986',e:0.3,en:'5 / 1,437'}];
+    const x=v=>m.l+(v/10)*(W-m.l-m.r),rowY=i=>m.t+20+i*52;
+    const ax=el('g',{class:'axis'},svg),yEnd=rowY(1)+24;
+    [0,2,4,6,8,10].forEach(v=>{el('line',{x1:x(v),x2:x(v),y1:m.t-4,y2:yEnd,class:v?'':'base'},ax);txt(ax,{x:x(v),y:yEnd+16,'text-anchor':'middle'},v+'%');});
+    txt(ax,{x:(m.l+W-m.r)/2,y:yEnd+32,'text-anchor':'middle'},'quotes flagged as fabricated');
+    rows.forEach((r,i)=>{const Y=rowY(i);
+      txt(svg,{class:'lab b',x:m.l-12,y:Y+4,'text-anchor':'end'},r.k);
+      el('line',{x1:x(r.a),x2:x(r.e),y1:Y,y2:Y,stroke:'var(--line)','stroke-width':4,'stroke-linecap':'round'},svg);
+      const ca=el('circle',{cx:x(r.a),cy:Y,r:7,fill:'var(--ink-3)',stroke:'var(--surface)','stroke-width':2},svg);
+      const ce=el('circle',{cx:x(r.e),cy:Y,r:7,fill:'var(--s1)',stroke:'var(--surface)','stroke-width':2},svg);
+      if(r.a>2){txt(svg,{class:'lab',x:x(r.a),y:Y-12,'text-anchor':'middle'},r.a+'%');txt(svg,{class:'lab',x:x(r.e)+12,y:Y-12},r.e+'%');}
+      else txt(svg,{class:'lab',x:x(Math.max(r.a,r.e))+12,y:Y+4},`${r.a}% → ${r.e}%`);
+      hover(ca,tp,`${r.k}, original design<br><b>${r.an}</b> quotes (${r.a}%)`,x(r.a),Y-8);
+      hover(ce,tp,`${r.k}, full system<br><b>${r.en}</b> quotes (${r.e}%)`,x(r.e),Y-8);
+      rowsOut.push(['Held-out fabrication',r.k+', original design',`${r.an} (${r.a}%)`]);
+      rowsOut.push(['Held-out fabrication',r.k+', full system',`${r.en} (${r.e}%)`]);});
+  })();
+
+  // ---- chart 4: quotes verified by deal, dot plot
+  (function(){
+    const svg=document.getElementById('c4'),tp=tipper(svg,document.getElementById('tip4'),520,200);
+    const W=520,H=200,m={l:40,r:160,t:26,b:30},rows=[
+      {k:'D1',g:73.3,gn:'187 / 255',q:92.0,qn:'370 / 402',v:'PASS · INVEST'},
+      {k:'D2',g:98.8,gn:'238 / 241',q:99.7,qn:'385 / 386',v:'VETOED · PASS'},
+      {k:'D3',g:84.5,gn:'202 / 239',q:90.5,qn:'325 / 359',v:'VETOED · VETOED'},
+      {k:'D4',g:96.2,gn:'225 / 234',q:99.8,qn:'435 / 436',v:'VETOED · VETOED'}];
+    const x=v=>m.l+((v-70)/30)*(W-m.l-m.r),rowY=i=>m.t+14+i*36;
+    const ax=el('g',{class:'axis'},svg),yEnd=rowY(3)+18;
+    [70,80,90,100].forEach(v=>{el('line',{x1:x(v),x2:x(v),y1:m.t-4,y2:yEnd,class:v===70?'base':''},ax);txt(ax,{x:x(v),y:yEnd+16,'text-anchor':'middle'},v+'%');});
+    txt(svg,{class:'lab',x:W-m.r+26,y:10},'verdict (gpt-oss · qwen)').setAttribute('fill','var(--ink-3)');
+    rows.forEach((r,i)=>{const Y=rowY(i);
+      txt(svg,{class:'lab b',x:m.l-10,y:Y+4,'text-anchor':'end'},r.k);
+      el('line',{x1:x(r.g),x2:x(r.q),y1:Y,y2:Y,stroke:'var(--line)','stroke-width':3},svg);
+      const cg=el('circle',{cx:x(r.g),cy:Y,r:6,fill:'var(--s2)',stroke:'var(--surface)','stroke-width':2},svg);
+      const cq=el('circle',{cx:x(r.q),cy:Y,r:6,fill:'var(--s1)',stroke:'var(--surface)','stroke-width':2},svg);
+      txt(svg,{class:'lab',x:W-m.r+26,y:Y+4},r.v);
+      hover(cg,tp,`${r.k}, gpt-oss-120b<br><b>${r.gn}</b> quotes verified (${r.g}%)`,x(r.g),Y-8);
+      hover(cq,tp,`${r.k}, qwen-3.8-27b<br><b>${r.qn}</b> quotes verified (${r.q}%)`,x(r.q),Y-8);
+      rowsOut.push(['Full system, quotes verified',r.k+' gpt-oss-120b',`${r.gn} (${r.g}%)`]);
+      rowsOut.push(['Full system, quotes verified',r.k+' qwen-3.8-27b',`${r.qn} (${r.q}%)`]);
+      rowsOut.push(['Full system, verdict',r.k+' (gpt-oss · qwen)',r.v]);});
+  })();
+
+  const tb=document.getElementById('tbl');
+  rowsOut.forEach(r=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${r[0]}</td><td>${r[1]}</td><td class="num">${r[2]}</td>`;tb.appendChild(tr);});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+ArchiveEntry "RBC P1: urate secreted <= adenine consumed, all strategies"
+/* Projected RBC automaton: every location has ade' = Bio*ga, urate' = Bio*gx with
+   (ga, gx) among the exact generator branches (50 rays + 2 lineality pairs collapse to 4).
+   The closing guard is dropped: a superset of the real runs, so sound for safety. */
+ProgramVariables
+  Real ade; Real x; Real ga; Real gx; Real Bio; Real A0; Real X0;
+End.
+Problem
+  Bio >= 0 & ade = A0 & x = X0
+  ->
+  [{
+     { {ga := -3; gx := 0;}
+       ++ {ga := -1; gx := 0;}
+       ++ {ga := -1; gx := 1;}
+       ++ {ga := 0; gx := 0;} };
+     { ade' = Bio*ga, x' = Bio*gx }
+   }*@invariant(x - X0 <= A0 - ade & Bio >= 0)] x - X0 <= A0 - ade
+End.
+Tactic "auto (uses the @invariant annotation)"
+  auto
+End.
+Tactic "manual: loop invariant, then ODE solve on each branch (hint; not run)"
+  implyR(1) ; loop("x - X0 <= A0 - ade & Bio >= 0", 1) ; <(
+    QE,
+    QE,
+    unfold ; doall(solve(1) ; QE)
+  )
+End.
+End.
+
+ArchiveEntry "RBC P2: hypoxanthine secreted <= adenine consumed, all strategies"
+/* Projected RBC automaton: every location has ade' = Bio*ga, hxan' = Bio*gx with
+   (ga, gx) among the exact generator branches (50 rays + 2 lineality pairs collapse to 4).
+   The closing guard is dropped: a superset of the real runs, so sound for safety. */
+ProgramVariables
+  Real ade; Real x; Real ga; Real gx; Real Bio; Real A0; Real X0;
+End.
+Problem
+  Bio >= 0 & ade = A0 & x = X0
+  ->
+  [{
+     { {ga := -3; gx := 0;}
+       ++ {ga := -1; gx := 0;}
+       ++ {ga := -1; gx := 1;}
+       ++ {ga := 0; gx := 0;} };
+     { ade' = Bio*ga, x' = Bio*gx }
+   }*@invariant(x - X0 <= A0 - ade & Bio >= 0)] x - X0 <= A0 - ade
+End.
+Tactic "auto (uses the @invariant annotation)"
+  auto
+End.
+Tactic "manual: loop invariant, then ODE solve on each branch (hint; not run)"
+  implyR(1) ; loop("x - X0 <= A0 - ade & Bio >= 0", 1) ; <(
+    QE,
+    QE,
+    unfold ; doall(solve(1) ; QE)
+  )
+End.
+End.

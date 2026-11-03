@@ -1,0 +1,12 @@
+ArchiveEntry "P3L: E = exp(c t) lies in [1+Q, 1/(1-Q)] (justifies the interval used in P3)"
+/* E' = c E, Q' = c, E(0)=1, Q(0)=0: E is exp(Q).  For every dwell time with Q < 1:
+   1 + Q <= E and (1 - Q) E <= 1, i.e. E <= 1/(1-Q).  Valid for any growth rate c > 0. */
+ProgramVariables
+  Real E, Q, c;
+End.
+Problem
+  c > 0 & E = 1 & Q = 0
+  ->
+  [{E' = c*E, Q' = c & Q >= 0}@invariant(E >= 1 + Q & (1-Q)*E <= 1 & E > 0 & Q >= 0)] (E >= 1 + Q & (1-Q)*E <= 1)
+End.
+End.
